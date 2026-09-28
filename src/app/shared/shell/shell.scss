@@ -1,7 +1,7 @@
 .frame { display: grid; grid-template-columns: 76px 1fr; min-height: 100vh; }
 .rail { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 18px 0; gap: 10px; background: var(--surface); border-right: 1px solid var(--line); }
-.logo { width: 42px; height: 42px; border-radius: 12px; background: var(--ink); display: grid; place-items: center; margin-bottom: 14px; }
-.logo .ball { width: 18px; height: 18px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #E6F58A, var(--ball) 55%, #9DB81C); }
+.logo { width: 48px; height: 48px; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: #fff; display: grid; place-items: center; margin-bottom: 14px; }
+.logo img { width: 46px; height: 46px; object-fit: cover; transform: scale(1.35); }
 nav, .bottom { display: flex; flex-direction: column; gap: 6px; }
 .bottom { margin-top: auto; }
 nav a, .bottom a, .ic { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; color: var(--ink-2); background: transparent; border: 0; cursor: pointer; font-size: 16px; }

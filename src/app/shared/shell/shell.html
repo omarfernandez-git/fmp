@@ -1,6 +1,6 @@
 <div class="frame">
   <aside class="rail" [class.open]="open()">
-    <a class="logo" routerLink="/" pTooltip="Panel" tooltipPosition="right"><span class="ball"></span></a>
+    <a class="logo" routerLink="/" pTooltip="Panel" tooltipPosition="right"><img src="logo.png" alt="MV Padel"></a>
     <nav>
       <a routerLink="/" routerLinkActive="on" [routerLinkActiveOptions]="{ exact: true }" pTooltip="Panel" tooltipPosition="right" (click)="open.set(false)"><i class="pi pi-home"></i></a>
       <a routerLink="/equipo" routerLinkActive="on" pTooltip="Equipo" tooltipPosition="right" (click)="open.set(false)"><i class="pi pi-chart-bar"></i></a>
