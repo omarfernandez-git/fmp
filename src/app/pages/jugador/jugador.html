@@ -1,0 +1,55 @@
+<div class="page">
+  <app-state [loading]="loading()" [error]="error()" />
+  @if (j(); as j) {
+    <div class="page-head">
+      <div><div class="eyebrow">Jugador · posición habitual pareja {{ j.posicion_habitual }}</div><h1>{{ j.jugador }}</h1><p class="sub">{{ j.n_parejas }} compañeros distintos · mejor pareja: {{ j.mejor_pareja || '–' }} · peor: {{ j.peor_pareja || '–' }}</p></div>
+      <div style="text-align:right"><app-form [forma]="j.forma" /><br><span class="small muted">últimos {{ j.forma.length }} partidos · {{ j.ultimos5 }}% en los últimos 5</span></div>
+    </div>
+    <div class="kpis">
+      <app-kpi label="Puntos FMP" [value]="j.puntos_ult ?? '–'" icon="pi-star" [sub]="'máx ' + j.puntos_max + ' · mín ' + j.puntos_min" />
+      <app-kpi label="Elo del grupo" [value]="j.elo ?? '–'" icon="pi-chart-line" [tag]="j.elo ? (j.elo >= 1000 ? 'Sobre la media' : 'Bajo la media') : null" [tagSeverity]="j.elo >= 1000 ? 'success' : 'secondary'" />
+      <app-kpi label="Partidos" [value]="j.pj" icon="pi-calendar" [sub]="j.pg + ' ganados, ' + j.pp + ' perdidos'" />
+      <app-kpi label="Ganados" [value]="j.pct + '%'" icon="pi-percentage" [tone]="j.pct >= 50 ? 'win' : 'loss'" [sub]="'sets ' + j.pct_sets + '% · juegos ' + j.pct_juegos + '%'" />
+      <app-kpi label="Juegos de diferencia" [value]="(j.dif_juegos_media > 0 ? '+' : '') + j.dif_juegos_media" icon="pi-sort-alt" sub="por partido" [tone]="j.dif_juegos_media >= 0 ? 'win' : 'loss'" />
+      <app-kpi label="Rachas" [value]="j.racha_mejor + ' / ' + j.racha_peor" icon="pi-bolt" sub="mejor de victorias / peor de derrotas" />
+      <app-kpi label="Nivel de los rivales" [value]="j.media_pts_rival ?? '–'" icon="pi-users" sub="media de puntos de la pareja rival" />
+    </div>
+
+    <div class="grid grid-2 section">
+      <div class="card"><h2>Evolución de puntos FMP</h2>@if (j.puntos_hist.length > 1) {<app-chart type="line" [data]="puntosChart()" [options]="lineOpts" [height]="240" />} @else {<div class="empty">Sin historial suficiente.</div>}</div>
+      <div class="card"><h2>Evolución del Elo</h2>@if (j.elo_hist.length > 1) {<app-chart type="line" [data]="eloChart()" [options]="lineOpts" [height]="240" />} @else {<div class="empty">Sin historial suficiente.</div>}</div>
+      <div class="card"><h2>Rendimiento según la situación</h2><app-chart type="bar" [data]="situChart()" [options]="pctOptsH" [height]="320" /></div>
+      <div class="card"><h2>Situaciones en detalle</h2><table class="t"><tbody>
+        @for (s of situaciones(); track s[0]) {<tr><td>{{ s[0] }}</td><td><app-pct [v]="s[1]" /></td></tr>}
+        <tr><td>Remontadas / partidos perdidos tras ganar el 1er set</td><td>{{ j.remontadas }} / {{ j.desperdicios }}</td></tr>
+        <tr><td>Tie-breaks ganados – perdidos</td><td>{{ j.tb_g }} – {{ j.tb_p }}</td></tr>
+        <tr><td>Sets 6-0 a favor – en contra</td><td>{{ j.rosco_g }} – {{ j.rosco_p }}</td></tr>
+      </tbody></table></div>
+      <div class="card"><h2>Por posición en la alineación</h2><app-chart type="bar" [data]="posChart()" [options]="stackOpts" [height]="240" />
+        <table class="t" style="margin-top:8px"><tbody>@for (kv of entries(j.por_turno); track kv[0]) {<tr><td>Turno {{ kv[0] }}</td><td><app-pct [v]="kv[1]" /></td></tr>}</tbody></table></div>
+      <div class="card"><h2>Por mes</h2><app-chart type="bar" [data]="mesChart()" [options]="stackOpts" [height]="240" /></div>
+      <div class="card"><h2>Con cada compañero</h2><app-chart type="bar" [data]="parChart()" [options]="stackOptsH" [height]="320" />
+        <p class="small muted">Mejor pareja (mínimo 3 partidos): <b>{{ j.mejor_pareja || '–' }}</b> · peor: {{ j.peor_pareja || '–' }}</p></div>
+      <div class="card"><h2>Por temporada</h2><table class="t"><thead><tr><th>Temporada</th><th class="num">PJ</th><th>Ganados</th><th class="num">Puntos inicio → fin (máx)</th></tr></thead><tbody>
+        @for (kv of entries(j.por_temporada); track kv[0]) {<tr><td>{{ tname(kv[0]) }}</td><td class="num">{{ kv[1].pj }}</td><td><app-pct [v]="kv[1]" /></td><td class="num">{{ kv[1].inicio ?? '–' }} → {{ kv[1].fin ?? '–' }} ({{ kv[1].max ?? '–' }})</td></tr>}
+      </tbody></table>
+      <h3 style="margin-top:16px">Contra cada equipo</h3><table class="t"><tbody>@for (kv of entries(j.por_rival_equipo); track kv[0]) {<tr><td>{{ kv[0] }}</td><td><app-pct [v]="kv[1]" /></td></tr>}</tbody></table></div>
+      <div class="card"><h2>Ajustes para las alineaciones</h2>
+        <form (ngSubmit)="guardar()" style="display:grid;gap:12px">
+          <label class="f">Puntos manuales (vacío = usar el acta u oficiales)<p-inputnumber name="p" [(ngModel)]="ajuste.puntos_manual" [showButtons]="true" [step]="40" /></label>
+          <div style="display:flex;gap:8px;align-items:center"><p-checkbox name="a" [(ngModel)]="ajuste.activo" [binary]="true" inputId="act" /><label for="act" class="small">Cuenta para las alineaciones</label></div>
+          <label class="f">Nota<input pInputText name="n" [(ngModel)]="ajuste.nota"></label>
+          <div style="display:flex;gap:10px;align-items:center"><p-button type="submit" label="Guardar ajustes" size="small" /> <span class="small muted">{{ msg() }}</span></div>
+        </form></div>
+    </div>
+
+    <div class="section"><h2>Todos sus partidos</h2>
+      <div class="card table-wrap"><table class="t"><thead><tr><th>Temp.</th><th>J</th><th>Fecha</th><th>Con</th><th class="num">Pts</th><th>Contra</th><th class="num">Pts</th><th>Sets</th><th></th><th>Pos.</th><th></th></tr></thead><tbody>
+        @for (r of j.partidos.slice().reverse(); track r.encuentro_id + '-' + r.orden) {
+          <tr><td>{{ tname(r.categoria_id) }}</td><td>{{ r.jornada }}</td><td>{{ r.fecha }}</td><td><a [routerLink]="['/jugador', r.pareja_key]">{{ r.pareja }}</a></td><td class="num">{{ r.pareja_pts }}</td>
+            <td>{{ r.rival }}<br><span class="small muted">{{ r.rival_equipo }}</span></td><td class="num">{{ r.rival_pts }}</td>
+            <td class="num">@for (s of r.sets; track $index) {{{ s[0] }}-{{ s[1] }}{{ $last ? '' : ' · ' }}}</td>
+            <td><p-tag [value]="r.gano ? 'G' : 'P'" [severity]="r.gano ? 'success' : 'danger'" [rounded]="true" /></td><td>#{{ r.orden }} {{ r.casa ? 'casa' : 'fuera' }}</td><td><a [routerLink]="['/encuentro', r.encuentro_id]">acta</a></td></tr>
+        }</tbody></table></div></div>
+  }
+</div>

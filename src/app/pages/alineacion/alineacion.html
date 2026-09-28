@@ -1,0 +1,54 @@
+<div class="page">
+  <app-state [loading]="loading()" [error]="error()" />
+  @if (d(); as d) {
+    <div class="page-head">
+      <div><div class="eyebrow">{{ d.temporada.temporada }} · {{ d.temporada.grupo }}</div><h1>Alineación · jornada {{ d.jornada }}</h1>
+        @if (d.encuentro) {<p class="sub"><b>{{ d.encuentro.local }}</b> contra <b>{{ d.encuentro.visitante }}</b> · {{ d.encuentro.fecha || 'fecha pendiente' }} · {{ d.encuentro.local_id === d.equipo.id ? 'en casa' : 'fuera' }}@if (d.encuentro.res_local !== null) { · ya jugado {{ d.encuentro.res_local }}–{{ d.encuentro.res_visitante }}, <a [routerLink]="['/encuentro', d.encuentro.id]">ver acta</a>}</p>} @else {<p class="sub">Calendario aún no publicado para esta jornada.</p>}</div>
+      <div class="toolbar" style="margin:0;max-width:560px">@for (j of d.jornadas; track j) {<a [routerLink]="['/alineacion', d.temporada.id, j]" class="p-button p-button-sm p-button-rounded" [class.p-button-outlined]="j !== d.jornada" style="padding:4px 10px">{{ j }}</a>}</div>
+    </div>
+    @if (d.jugadores[0]?.plantilla_de) {<div style="display:block;margin-bottom:14px"><p-message severity="warn" text="La FMP aún no ha publicado la plantilla de esta temporada; se usa la de la liga anterior." /></div>}
+    @if (msg()) {<div style="display:block;margin-bottom:14px"><p-message severity="success" [text]="msg()" /></div>}
+    <div class="kpis">
+      <app-kpi label="Disponibles" [value]="disponibles()" icon="pi-check-circle" [sub]="'de ' + d.jugadores.length + ' jugadores'" />
+      <app-kpi label="Modo de propuesta" [value]="modo() === 'fuerza' ? 'Por fuerza' : modo() === 'equilibrado' ? 'Equilibrado' : 'Con química'" icon="pi-sliders-h" />
+      <app-kpi label="Suplentes" [value]="d.suplentes.length" icon="pi-user-plus" [sub]="d.suplentes.length ? d.suplentes[0].jugador : 'ninguno'" />
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-head"><h2>1 · Quién puede jugar</h2><p-button label="Guardar disponibilidad" size="small" (onClick)="guardarDisp()" /></div>
+        <p class="small muted" style="margin-bottom:8px">Los puntos son los oficiales si están disponibles, si no el último valor visto en un acta. Pulsa el nombre para fijar puntos manuales.</p>
+        <div class="disp" style="border-bottom:2px solid var(--line)"><b class="small">Jugador</b><b class="small num">Pts</b><b class="small">Disponible</b><b class="small">Nota</b></div>
+        @for (j of d.jugadores; track j.key) {
+          <div class="disp" [style.opacity]="j.activo ? 1 : .45">
+            <div><a [routerLink]="['/jugador', j.key]">{{ j.jugador }}</a><br><span class="small muted">{{ j.pg }}/{{ j.pj }} ganados · {{ j.origen }}</span></div>
+            <div class="num"><b>{{ j.puntos }}</b></div>
+            <app-seg [options]="dispOpts" [value]="j.disponible" (change)="j.disponible = $event" />
+            <input pInputText size="small" [(ngModel)]="j.nota" placeholder="nota">
+          </div>
+        }
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>2 · Propuesta y alineación</h2><app-seg [options]="modoOpts" [value]="modo()" (change)="cambiarModo($event)" /></div>
+        <p class="small muted" style="margin-bottom:10px">Por fuerza junta 1-2, 3-4…; equilibrado 1-10, 2-9…; con química prioriza parejas que ya han ganado juntas. Puedes cambiar cualquier jugador. Regla FMP: dentro de cada turno, las parejas van de mayor a menor suma de puntos.</p>
+        @if (!d.propuesta.length) {<div class="empty">Marca al menos dos jugadores como disponibles para ver una propuesta.</div>}
+        @for (a of avisosEdicion(); track a) {<div style="display:block;margin-bottom:8px"><p-message severity="warn" [text]="a" /></div>}
+        <div class="pareja" style="border-bottom:2px solid var(--line)"><b class="small">Pareja</b><b class="small">Jugador 1</b><b class="small">Jugador 2</b><b class="small num">Suma</b></div>
+        @for (p of edicion; track p.orden) {
+          <div class="pareja" [class.t2]="p.turno === 2">
+            <div class="o">{{ p.orden }}<small>turno {{ p.turno }}</small></div>
+            <p-select [options]="jugOpts()" [(ngModel)]="p.jugador1" optionLabel="label" optionValue="value" [filter]="true" [showClear]="true" size="small" placeholder="Elegir" appendTo="body" (onChange)="tick.set(tick() + 1)" />
+            <p-select [options]="jugOpts()" [(ngModel)]="p.jugador2" optionLabel="label" optionValue="value" [filter]="true" [showClear]="true" size="small" placeholder="Elegir" appendTo="body" (onChange)="tick.set(tick() + 1)" />
+            <div class="num"><b>{{ suma(p) }}</b></div>
+          </div>
+        }
+        <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+          <p-button label="Guardar alineación" (onClick)="guardarAli()" />
+          <p-button label="Volver a la propuesta" severity="secondary" [outlined]="true" (onClick)="usarPropuesta()" />
+        </div>
+        @if (d.suplentes.length) {<p class="small muted" style="margin-top:10px">Suplentes: @for (s of d.suplentes; track s.key) {{{ s.jugador }} ({{ s.puntos }}){{ $last ? '' : ', ' }}}</p>}
+        @if (d.guardada.length) {<p class="small" style="margin-top:8px"><p-tag value="Guardada" severity="success" [rounded]="true" /> hay una alineación guardada para esta jornada.</p>}
+      </div>
+    </div>
+  }
+</div>

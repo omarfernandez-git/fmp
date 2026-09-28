@@ -1,0 +1,22 @@
+<div class="frame">
+  <aside class="rail" [class.open]="open()">
+    <a class="logo" routerLink="/" pTooltip="Panel" tooltipPosition="right"><span class="ball"></span></a>
+    <nav>
+      <a routerLink="/" routerLinkActive="on" [routerLinkActiveOptions]="{ exact: true }" pTooltip="Panel" tooltipPosition="right" (click)="open.set(false)"><i class="pi pi-home"></i></a>
+      <a routerLink="/equipo" routerLinkActive="on" pTooltip="Equipo" tooltipPosition="right" (click)="open.set(false)"><i class="pi pi-chart-bar"></i></a>
+      <a routerLink="/jugadores" routerLinkActive="on" pTooltip="Jugadores" tooltipPosition="right" (click)="open.set(false)"><i class="pi pi-users"></i></a>
+      @if (actual(); as t) {
+        <a [routerLink]="['/alineacion', t.id, 1]" routerLinkActive="on" pTooltip="Alineación" tooltipPosition="right" (click)="open.set(false)"><i class="pi pi-th-large"></i></a>
+        <a [routerLink]="['/rivales', t.id]" routerLinkActive="on" pTooltip="Rivales" tooltipPosition="right" (click)="open.set(false)"><i class="pi pi-shield"></i></a>
+        <a [routerLink]="['/temporada', t.id]" routerLinkActive="on" pTooltip="Calendario y temporadas" tooltipPosition="right" (click)="open.set(false)"><i class="pi pi-calendar"></i></a>
+      }
+    </nav>
+    <div class="bottom">
+      <button class="ic" (click)="actualizar()" [disabled]="refresh().running" [pTooltip]="refresh().running ? 'Actualizando…' : 'Actualizar datos desde la FMP'" tooltipPosition="right"><i class="pi" [class.pi-refresh]="true" [class.pi-spin]="refresh().running"></i></button>
+      <a routerLink="/cuenta" routerLinkActive="on" pTooltip="Tu cuenta" tooltipPosition="right"><i class="pi pi-user"></i></a>
+      <button class="ic" (click)="salir()" pTooltip="Salir" tooltipPosition="right"><i class="pi pi-sign-out"></i></button>
+    </div>
+  </aside>
+  <button class="burger" (click)="open.set(!open())" aria-label="Menú"><i class="pi pi-bars"></i></button>
+  <main><router-outlet /></main>
+</div>

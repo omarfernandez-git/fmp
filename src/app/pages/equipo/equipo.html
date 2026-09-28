@@ -1,0 +1,78 @@
+<div class="page">
+  <app-state [loading]="loading()" [error]="error()" />
+  @if (E(); as E) {
+    <div class="page-head">
+      <div><div class="eyebrow">Equipo</div><h1>El equipo en números</h1><p class="sub">{{ cid() ? 'Temporada ' + tname(cid()) : 'Todas las temporadas' }} · {{ E.n_jugadores }} jugadores utilizados</p></div>
+      <app-seg [options]="segOpts()" [value]="cid()" (change)="goCid($event)" />
+    </div>
+
+    @if (!S().pj) {<div class="empty">Sin encuentros jugados en esta selección.</div>} @else {
+    <div class="kpis">
+      <app-kpi label="Encuentros" [value]="S().pj" icon="pi-calendar" [sub]="S().pg + ' ganados, ' + S().pp + ' perdidos'" />
+      <app-kpi label="Encuentros ganados" [value]="S().pct + '%'" icon="pi-flag" [tone]="S().pct >= 50 ? 'win' : 'loss'" [sub]="'casa ' + S().casa.pct + '% · fuera ' + S().fuera.pct + '%'" />
+      <app-kpi label="Partidos ganados" [value]="P().pct + '%'" icon="pi-percentage" [sub]="P().pg + ' de ' + P().pj" />
+      <app-kpi label="Juegos de diferencia" [value]="(P().dif_juegos_media > 0 ? '+' : '') + P().dif_juegos_media" icon="pi-sort-alt" sub="por partido" [tone]="P().dif_juegos_media >= 0 ? 'win' : 'loss'" />
+      <app-kpi label="Rachas" [value]="S().racha_mejor + ' / ' + S().racha_peor" icon="pi-bolt" sub="mejor de victorias / peor de derrotas" />
+      <app-kpi label="Encuentros 3-2" [value]="S().decisivos_g + ' / ' + S().decisivos.length" icon="pi-star" sub="ganados / jugados" />
+      <app-kpi label="Forma" icon="pi-chart-line" sub="últimos encuentros"><app-form [forma]="S().forma" /></app-kpi>
+    </div>
+
+    <div class="section stack">
+      @for (id of seriesIds(); track id) {
+        <div class="card"><div class="card-head"><h2>Temporada {{ tname(id) }}, encuentro a encuentro</h2><a routerLink="/equipo" [queryParams]="{ cid: id }" class="small">solo esta temporada</a></div><app-season-strip [encuentros]="E.series[id]" /></div>
+      }
+    </div>
+
+    <div class="grid grid-2 section">
+      <div class="card"><h2>Rendimiento según la situación</h2><app-chart type="bar" [data]="situChart()!" [options]="pctOptsH" [height]="300" /></div>
+      <div class="card"><h2>Partidos ganados por pareja (posición)</h2><app-chart type="bar" [data]="posChart()" [options]="pctOpts" [height]="300" />
+        <table class="t" style="margin-top:10px"><thead><tr><th>Pareja</th><th>Ganados</th><th class="num">Punto decisivo en 3-2</th></tr></thead><tbody>
+          @for (kv of entries(P().por_posicion); track kv[0]) {<tr><td>#{{ kv[0] }} (turno {{ +kv[0] <= 3 ? 1 : 2 }})</td><td><app-pct [v]="kv[1]" /></td><td class="num">{{ S().punto_decisivo_por_posicion[kv[0]] || 0 }}</td></tr>}
+        </tbody></table></div>
+      <div class="card"><h2>Encuentros por mes</h2><app-chart type="bar" [data]="mesChart()" [options]="stackOpts" [height]="260" /></div>
+      <div class="card"><h2>Marcadores</h2><app-chart type="doughnut" [data]="marcChart()" [options]="doughOpts" [height]="260" /></div>
+      <div class="card"><h2>Diferencia de puntos acumulada por jornada</h2><app-chart type="line" [data]="acumChart()" [options]="lineOpts" [height]="260" /></div>
+      <div class="card"><h2>Contra rivales de más o menos puntos</h2><p class="small muted" style="margin-bottom:8px">Diferencia entre los puntos de la pareja rival y los de la nuestra según el acta.</p><app-chart type="bar" [data]="nivelChart()" [options]="nivelOpts" [height]="240" /></div>
+      <div class="card"><h2>Marcadores de set</h2><app-chart type="bar" [data]="setsChart()" [options]="barOpts" [height]="240" /></div>
+      <div class="card"><h2>Diferencia de juegos por partido</h2><app-chart type="bar" [data]="difChart()" [options]="barOpts" [height]="240" /></div>
+      <div class="card"><h2>Evolución de puntos FMP de los jugadores más habituales</h2><app-chart type="line" [data]="puntosChart()" [options]="lineOpts" [height]="300" /></div>
+      <div class="card"><h2>Partidos por jugador</h2><app-chart type="bar" [data]="partChart()" [options]="stackOptsH" [height]="420" /></div>
+    </div>
+
+    <div class="grid grid-2 section">
+      <div class="card"><h2>Detalle de partidos</h2><table class="t"><tbody>
+        <tr><td>Sets ganados – perdidos</td><td class="num">{{ P().sg }} – {{ P().sp }}</td></tr>
+        <tr><td>Juegos ganados – perdidos</td><td class="num">{{ P().jg }} – {{ P().jp }}</td></tr>
+        <tr><td>Remontadas tras perder el 1er set</td><td class="num">{{ P().remontadas }}</td></tr>
+        <tr><td>Partidos perdidos tras ganar el 1er set</td><td class="num">{{ P().desperdicios }}</td></tr>
+        <tr><td>Tie-breaks ganados – perdidos</td><td class="num">{{ P().tb_g }} – {{ P().tb_p }}</td></tr>
+        <tr><td>Sets 6-0 a favor – en contra</td><td class="num">{{ P().rosco_g }} – {{ P().rosco_p }}</td></tr>
+        <tr><td>Media de puntos de nuestra pareja / la rival</td><td class="num">{{ P().media_pts_propios }} / {{ P().media_pts_rival }}</td></tr>
+        <tr><td>Puntos de encuentro a favor – en contra</td><td class="num">{{ S().puntos_favor }} – {{ S().puntos_contra }}</td></tr>
+      </tbody></table></div>
+      <div class="card"><h2>Por temporada</h2><table class="t"><thead><tr><th>Temporada</th><th class="num">Encuentros G/J</th><th class="num">Pts F–C</th><th class="num">Partidos G/J</th></tr></thead><tbody>
+        @for (kv of entries(S().por_temporada); track kv[0]) {<tr><td><a routerLink="/equipo" [queryParams]="{ cid: kv[0] }">{{ tname(kv[0]) }}</a></td><td class="num">{{ kv[1].pg }}/{{ kv[1].pj }}</td><td class="num">{{ kv[1].pf }}–{{ kv[1].pc }}</td><td class="num">{{ kv[1].partidos_pg }}/{{ kv[1].partidos_pj }}</td></tr>}
+      </tbody></table></div>
+    </div>
+
+    <div class="section"><h2>Contra cada rival</h2>
+      <div class="card table-wrap"><table class="t"><thead><tr><th>Rival</th><th class="num">Encuentros</th><th class="num">G</th><th class="num">P</th><th class="num">Pts F–C</th><th>Partidos</th></tr></thead><tbody>
+        @for (kv of entries(S().por_rival); track kv[0]) {<tr><td>{{ kv[0] }}</td><td class="num">{{ kv[1].pj }}</td><td class="num win-text">{{ kv[1].pg }}</td><td class="num loss-text">{{ kv[1].pp }}</td><td class="num">{{ kv[1].pf }}–{{ kv[1].pc }}</td><td><app-pct [v]="P().por_rival[kv[0]]" /></td></tr>}
+      </tbody></table></div></div>
+
+    <div class="grid grid-2 section">
+      <div class="card"><h2>Encuentros decididos 3-2</h2><div class="table-wrap"><table class="t"><thead><tr><th>Temp.</th><th>J</th><th>Rival</th><th></th><th>Parejas que ganaron</th></tr></thead><tbody>
+        @for (d of S().decisivos; track d.encuentro_id) {<tr><td>{{ tname(d.categoria_id) }}</td><td>{{ d.jornada }}</td><td>{{ d.rival }}</td><td><app-gp [gano]="d.gano" /></td><td>{{ d.ganadas.join(', ') }} · <a [routerLink]="['/encuentro', d.encuentro_id]">acta</a></td></tr>}
+      </tbody></table></div></div>
+      <div class="card"><h2>Parejas más utilizadas</h2><div class="table-wrap"><table class="t"><thead><tr><th>Pareja</th><th class="num">PJ</th><th>Ganados</th><th class="num">Sets</th></tr></thead><tbody>
+        @for (p of E.parejas.slice(0, 25); track p.pareja) {<tr><td>{{ p.pareja }}</td><td class="num">{{ p.pj }}</td><td><app-pct [v]="p" /></td><td class="num">{{ p.sg }}–{{ p.sp }}</td></tr>}
+      </tbody></table></div></div>
+    </div>
+
+    <div class="section"><h2>Participación</h2>
+      <div class="card table-wrap"><table class="t"><thead><tr><th>Jugador</th><th class="num">Partidos</th><th>Ganados</th><th class="num">% de los partidos del equipo</th></tr></thead><tbody>
+        @for (j of E.jugadores; track j.jugador) {<tr><td><a [routerLink]="['/jugador', j.jugador.toLowerCase()]">{{ j.jugador }}</a></td><td class="num">{{ j.pj }}</td><td><app-pct [v]="j" /></td><td class="num">{{ j.participacion }}%</td></tr>}
+      </tbody></table></div></div>
+    }
+  }
+</div>

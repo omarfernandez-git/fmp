@@ -1,0 +1,74 @@
+<div class="page">
+  <app-state [loading]="loading()" [error]="error()" />
+  @if (d(); as d) {
+    <div class="page-head">
+      <div><div class="eyebrow">{{ d.temporada.nombre }} · {{ d.temporada.grupo }} <p-tag [value]="d.encuentros.length ? 'En juego' : 'Pretemporada'" [severity]="d.encuentros.length ? 'success' : 'secondary'" [rounded]="true" /></div>
+        <h1>{{ d.equipo.nombre }}</h1><p class="sub">{{ d.equipo.sede }} · {{ d.equipo.pistas }} pistas · delegado {{ d.equipo.delegado }}</p></div>
+      <div class="toolbar" style="margin:0">
+        <a [routerLink]="['/alineacion', d.temporada.id, 1]" class="p-button p-button-sm"><i class="pi pi-th-large" style="margin-right:6px"></i>Preparar alineación</a>
+        <a [routerLink]="['/rivales', d.temporada.id]" class="p-button p-button-sm p-button-outlined">Rivales</a>
+        <a [routerLink]="['/temporada', d.temporada.id]" class="p-button p-button-sm p-button-outlined">Calendario</a>
+      </div>
+    </div>
+
+    <div class="kpis">
+      <app-kpi label="Posición" [value]="(pos()?.pos || '–') + ' / ' + d.clasificacion.length" icon="pi-list" [sub]="d.temporada.grupo | lowercase" />
+      <app-kpi label="Encuentros" [value]="d.resumen.pg + ' – ' + d.resumen.pp" icon="pi-calendar" [sub]="d.resumen.pj ? d.resumen.pct + '% ganados' : 'sin jugar'" [tag]="d.resumen.pj ? (d.resumen.pct >= 50 ? 'Positivo' : 'Negativo') : null" [tagSeverity]="d.resumen.pct >= 50 ? 'success' : 'danger'" />
+      <app-kpi label="Casa · fuera" [value]="d.resumen.casa.pg + '/' + d.resumen.casa.pj + ' · ' + d.resumen.fuera.pg + '/' + d.resumen.fuera.pj" icon="pi-home" sub="encuentros ganados" />
+      <app-kpi label="Partidos de pareja" [value]="d.partidos.pj ? d.partidos.pct + '%' : '–'" icon="pi-percentage" [sub]="d.partidos.pg + ' ganados de ' + d.partidos.pj" />
+      <app-kpi label="Forma" icon="pi-bolt" [sub]="d.resumen.racha_actual > 0 ? d.resumen.racha_actual + ' victorias seguidas' : d.resumen.racha_actual < 0 ? (-d.resumen.racha_actual) + ' derrotas seguidas' : ''"><app-form [forma]="d.resumen.forma" /></app-kpi>
+    </div>
+
+    @if (strip(); as s) {
+      <div class="card">
+        <div class="card-head"><h2>{{ s.t?.id === d.temporada.id ? 'La temporada, encuentro a encuentro' : 'Temporada ' + (s.t?.temporada || '') + ', encuentro a encuentro' }}</h2>
+          @if (s.t?.id !== d.temporada.id) {<p-tag value="La liga actual aún no ha empezado: se muestra la anterior" severity="secondary" [rounded]="true" />}</div>
+        @if (s.encs.length) {<app-season-strip [encuentros]="s.encs" />} @else {<div class="empty">Sin encuentros jugados todavía.</div>}
+        <p class="small muted" style="margin-top:6px">Cada bloque es un encuentro: verde ganado, rojo perdido; la altura es el margen del marcador. Pasa el ratón para ver el rival y pulsa para abrir el acta.</p>
+      </div>
+    }
+
+    <div class="grid grid-2 section">
+      <div class="card"><div class="card-head"><h2>Clasificación</h2><a [routerLink]="['/temporada', d.temporada.id]" class="small">ver todo</a></div>
+        <p-table [value]="d.clasificacion" size="small">
+          <ng-template #header><tr><th>#</th><th>Equipo</th><th class="num">J</th><th class="num">G</th><th class="num">P</th><th class="num">Sets</th><th class="num">Pts</th></tr></ng-template>
+          <ng-template #body let-c><tr [class.me]="isMe(c.equipo, d.equipo.nombre)"><td>{{ c.pos }}</td><td>{{ c.equipo }}</td><td class="num">{{ c.pj }}</td><td class="num">{{ c.pg }}</td><td class="num">{{ c.pp }}</td><td class="num">{{ c.sg }}–{{ c.sp }}</td><td class="num"><b>{{ c.total }}</b></td></tr></ng-template>
+        </p-table></div>
+      <div class="card"><div class="card-head"><h2>Plantilla y puntos</h2><a routerLink="/jugadores" class="small">todas las estadísticas</a></div>
+        @if (d.plantilla[0]?.plantilla_de) {<div class="notice small" style="margin-bottom:10px">La FMP aún no ha publicado la plantilla de esta temporada; se usa la de la liga anterior.</div>}
+        <p-table [value]="d.plantilla" size="small" [scrollable]="true" scrollHeight="440px">
+          <ng-template #header><tr><th>Jugador</th><th class="num">Puntos</th><th>Ganados</th><th>Forma</th></tr></ng-template>
+          <ng-template #body let-j><tr [style.opacity]="j.activo ? 1 : .45"><td><a [routerLink]="['/jugador', j.key]">{{ j.jugador }}</a> @if (j.origen === 'manual') {<p-tag value="manual" severity="warn" [rounded]="true" />} @if (j.origen === 'oficial') {<p-tag value="oficial" severity="success" [rounded]="true" />}</td>
+            <td class="num"><b>{{ j.puntos }}</b></td><td><app-pct [v]="{ pj: j.pj, pg: j.pg, pct: j.pct }" /></td>
+            <td>@for (f of d.jugadores_forma; track f.key) { @if (f.key === j.key) {<app-form [forma]="f.forma.slice(-8)" />} }</td></tr></ng-template>
+        </p-table></div>
+    </div>
+
+    <div class="grid grid-2 section">
+      <div class="card"><h2>Victorias acumuladas por jornada, temporada a temporada</h2><app-chart type="line" [data]="acumChart()!" [options]="lineOpts" [height]="260" /></div>
+      <div class="card"><h2>Partidos ganados por pareja (posición)</h2>@if (d.partidos.pj) {<app-chart type="bar" [data]="posChart()!" [options]="pctOpts" [height]="260" />} @else {<div class="empty">Aún sin partidos esta temporada.</div>}</div>
+    </div>
+
+    <div class="section card">
+      <div class="card-head"><h2>Encuentros {{ d.temporada.temporada }}</h2></div>
+      @if (d.encuentros.length) {
+        <p-table [value]="d.encuentros" size="small">
+          <ng-template #header><tr><th>J</th><th>Fecha</th><th>Local</th><th class="num">Resultado</th><th>Visitante</th><th></th><th></th></tr></ng-template>
+          <ng-template #body let-e><tr><td>{{ e.jornada }}</td><td>{{ e.fecha || '–' }}</td>
+            <td [style.font-weight]="e.local_id === d.equipo.id ? 600 : 400">{{ e.local }}</td>
+            <td class="num" [class.win-text]="res(e, d.equipo.id) === true" [class.loss-text]="res(e, d.equipo.id) === false"><b>{{ e.res_local ?? '–' }} – {{ e.res_visitante ?? '–' }}</b></td>
+            <td [style.font-weight]="e.visitante_id === d.equipo.id ? 600 : 400">{{ e.visitante }}</td>
+            <td>@if (res(e, d.equipo.id) !== null) {<p-tag [value]="res(e, d.equipo.id) ? 'G' : 'P'" [severity]="res(e, d.equipo.id) ? 'success' : 'danger'" [rounded]="true" />}</td>
+            <td class="small"><a [routerLink]="['/encuentro', e.id]">acta</a> · <a [routerLink]="['/alineacion', e.categoria_id, e.jornada]">alineación</a></td></tr></ng-template>
+        </p-table>
+      } @else {<div class="empty">La FMP todavía no ha publicado el calendario de este grupo. Usa el botón de actualizar de la barra lateral cuando salga.</div>}
+    </div>
+
+    <div class="section card"><h2>Historial del club en la liga</h2>
+      <p-table [value]="d.historial" size="small">
+        <ng-template #header><tr><th>Temporada</th><th>Liga</th><th>Grupo</th><th>Equipo</th><th class="num">Posición</th><th class="num">J</th><th class="num">G</th><th class="num">P</th><th class="num">Pts</th></tr></ng-template>
+        <ng-template #body let-h><tr><td><a [routerLink]="['/temporada', h.id]">{{ h.temporada }}</a></td><td>{{ h.nombre }}</td><td>{{ h.grupo }}</td><td>{{ h.equipo }}</td>
+          <td class="num">{{ h.clasificacion?.pos || '–' }} / {{ h.n_equipos }}</td><td class="num">{{ h.clasificacion?.pj }}</td><td class="num">{{ h.clasificacion?.pg }}</td><td class="num">{{ h.clasificacion?.pp }}</td><td class="num"><b>{{ h.clasificacion?.total }}</b></td></tr></ng-template>
+      </p-table></div>
+  }
+</div>

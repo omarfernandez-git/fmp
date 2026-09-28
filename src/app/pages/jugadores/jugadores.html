@@ -1,0 +1,32 @@
+<div class="page">
+  <app-state [loading]="loading()" [error]="error()" />
+  @if (d(); as d) {
+    <div class="page-head">
+      <div><div class="eyebrow">Jugadores</div><h1>Todos los jugadores del club</h1><p class="sub">{{ cid() ? 'Temporada ' + tname(cid()) : 'Todas las temporadas' }} · {{ rows().length }} jugadores · pulsa una columna para ordenar</p></div>
+      <div class="toolbar" style="margin:0"><span class="small muted">Mín. partidos</span><p-inputnumber [ngModel]="minPj()" (ngModelChange)="minPj.set($event || 1)" [min]="1" [showButtons]="true" size="small" inputStyleClass="w-4rem" [inputStyle]="{ width: '64px' }" /><app-seg [options]="segOpts()" [value]="cid()" (change)="goCid($event)" /></div>
+    </div>
+    <div class="grid grid-2">
+      <div class="card"><h2>Puntos FMP frente a rendimiento real</h2><p class="small muted" style="margin-bottom:6px">El tamaño del punto es el número de partidos. Arriba a la izquierda: rinde más de lo que dicen sus puntos.</p><app-chart type="bubble" [data]="scatter()" [options]="scatterOpts" [height]="300" /></div>
+      <div class="card"><h2>Rating Elo</h2><p class="small muted" style="margin-bottom:6px">Calculado con todos los partidos del grupo: sube más quien vence a parejas mejores. 1000 es la media.</p><app-chart type="bar" [data]="eloChart()" [options]="eloOpts" [height]="300" /></div>
+    </div>
+    <div class="section card" style="padding:0 0 8px">
+      <p-table [value]="rows()" size="small" [scrollable]="true" scrollHeight="600px" [customSort]="true" (sortFunction)="$event" >
+        <ng-template #header><tr>@for (c of cols; track c[0]) {<th [class.num]="c[0] !== 'jugador' && c[0] !== 'forma'" style="cursor:pointer;white-space:nowrap" (click)="setSort(c[0])" [style.color]="sort().k === c[0] ? 'var(--ink)' : ''">{{ c[1] }} @if (sort().k === c[0]) {<i class="pi" [class.pi-sort-amount-up]="sort().dir === 1" [class.pi-sort-amount-down]="sort().dir === -1" style="font-size:11px"></i>}</th>}</tr></ng-template>
+        <ng-template #body let-j><tr><td style="white-space:nowrap"><a [routerLink]="['/jugador', j.key]">{{ j.jugador }}</a></td><td class="num"><b>{{ j.puntos_ult ?? '–' }}</b></td><td class="num">{{ j.elo ?? '–' }}</td><td class="num">{{ j.pj }}</td><td class="num">{{ j.pg }}</td>
+            <td class="num" [class.win-text]="j.pct >= 50" [class.loss-text]="j.pct < 50">{{ j.pct }}%</td><td class="num">{{ j.pct_sets }}%</td><td class="num">{{ j.pct_juegos }}%</td><td class="num">{{ j.dif_juegos_media > 0 ? '+' : '' }}{{ j.dif_juegos_media }}</td>
+            <td class="num">{{ j.casa.pct }}%</td><td class="num">{{ j.fuera.pct }}%</td><td class="num">{{ j.tres.pj ? j.tres.pct + '%' : '–' }}</td><td class="num">{{ j.primer_g.pj ? j.primer_g.pct + '%' : '–' }}</td><td class="num">{{ j.primer_p.pj ? j.primer_p.pct + '%' : '–' }}</td>
+            <td class="num">{{ j.favorito.pj ? j.favorito.pct + '%' : '–' }}</td><td class="num">{{ j.underdog.pj ? j.underdog.pct + '%' : '–' }}</td><td class="num">{{ j.decisivo.pj ? j.decisivo.pct + '%' : '–' }}</td><td class="num">{{ j.tb_g }}–{{ j.tb_p }}</td><td class="num">{{ j.racha_mejor }}/{{ j.racha_peor }}</td>
+            <td><app-form [forma]="j.forma.slice(-8)" /></td><td class="num">{{ j.posicion_habitual }}</td><td class="num">{{ j.n_parejas }}</td></tr></ng-template>
+      </p-table>
+      <p class="small muted" style="padding:10px 16px 0">Favorito: la pareja tenía más puntos que la rival según el acta. En 3-2: partidos en encuentros que acabaron 3-2. TB: tie-breaks ganados–perdidos. Racha: mejor de victorias / peor de derrotas. Forma: últimos 8 partidos.</p>
+    </div>
+    <div class="section grid grid-2">
+      <div class="card"><h2>Parejas con más partidos</h2><app-chart type="bar" [data]="parejasChart()" [options]="stackOptsH" [height]="380" /></div>
+      <div class="card"><h2>Todas las parejas</h2>
+        <p-table [value]="d.parejas" size="small" [scrollable]="true" scrollHeight="380px" sortField="pj" [sortOrder]="-1">
+          <ng-template #header><tr><th>Pareja</th><th class="num" pSortableColumn="pj">PJ</th><th class="num" pSortableColumn="pg">PG</th><th class="num" pSortableColumn="pct">%</th><th class="num">Sets</th></tr></ng-template>
+          <ng-template #body let-p><tr><td>{{ p.j1 }} / {{ p.j2 }}</td><td class="num">{{ p.pj }}</td><td class="num">{{ p.pg }}</td><td class="num" [class.win-text]="p.pct >= 50" [class.loss-text]="p.pct < 50">{{ p.pct }}%</td><td class="num">{{ p.sg }}–{{ p.sp }}</td></tr></ng-template>
+        </p-table></div>
+    </div>
+  }
+</div>

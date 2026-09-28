@@ -1,0 +1,60 @@
+<div class="page">
+  <app-state [loading]="loading()" [error]="error()" />
+  @if (d(); as d) {
+    <div class="page-head">
+      <div><div class="eyebrow">Temporada {{ d.temporada.temporada }}</div><h1>{{ d.temporada.nombre }} · {{ d.temporada.grupo }}</h1><p class="sub">{{ d.equipo.nombre }} · <a [routerLink]="['/rivales', d.temporada.id]">ver rivales</a> · <a [routerLink]="['/alineacion', d.temporada.id, 1]">preparar alineación</a></p></div>
+      <div class="toolbar" style="margin:0">@for (t of temps(); track t.id) {<a [routerLink]="['/temporada', t.id]" class="p-button p-button-sm" [class.p-button-outlined]="t.id !== d.temporada.id">{{ t.temporada }}</a>}</div>
+    </div>
+    <div class="kpis">
+      <app-kpi label="Encuentros jugados" [value]="resumen().pj" icon="pi-calendar" [sub]="resumen().pendientes + ' pendientes'" />
+      <app-kpi label="Ganados" [value]="resumen().pg" icon="pi-check" tone="win" />
+      <app-kpi label="Perdidos" [value]="resumen().pp" icon="pi-times" tone="loss" />
+      <app-kpi label="Equipos en el grupo" [value]="d.clasificacion.length" icon="pi-users" />
+      <app-kpi label="Jugadores en plantilla" [value]="d.plantilla.length" icon="pi-id-card" />
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card"><div class="card-head"><h2>Clasificación</h2></div>
+        <p-table [value]="d.clasificacion" size="small" [rowTrackBy]="$any(null)">
+          <ng-template #header><tr><th>#</th><th>Equipo</th><th class="num">J</th><th class="num">G</th><th class="num">P</th><th class="num">SG</th><th class="num">SP</th><th class="num">Pts</th></tr></ng-template>
+          <ng-template #body let-c><tr [class.me]="isMe(c.equipo)"><td>{{ c.pos }}</td><td>{{ c.equipo }}</td><td class="num">{{ c.pj }}</td><td class="num">{{ c.pg }}</td><td class="num">{{ c.pp }}</td><td class="num">{{ c.sg }}</td><td class="num">{{ c.sp }}</td><td class="num"><b>{{ c.total }}</b></td></tr></ng-template>
+        </p-table></div>
+      <div class="card"><h2>Sets ganados y perdidos por equipo</h2><app-chart type="bar" [data]="clasChart()" [options]="clasOpts" [height]="380" /></div>
+    </div>
+
+    <div class="section card">
+      <div class="card-head"><h2>Encuentros</h2><app-seg [options]="vistaOpts" [value]="vista()" (change)="vista.set($event)" /></div>
+      @if (!encs().length) {<div class="empty">La FMP todavía no ha publicado el calendario de este grupo.</div>} @else {
+      <p-table [value]="encs()" size="small" [paginator]="encs().length > 30" [rows]="30">
+        <ng-template #header><tr><th>J</th><th>Fecha</th><th>Local</th><th class="num">Resultado</th><th>Visitante</th><th></th><th></th></tr></ng-template>
+        <ng-template #body let-e><tr [class.me]="vista() === 'todos' && (e.local_id === d.equipo.id || e.visitante_id === d.equipo.id)">
+          <td>{{ e.jornada }}</td><td>{{ e.fecha || '–' }}</td>
+          <td [style.font-weight]="e.local_id === d.equipo.id ? 600 : 400">{{ e.local }}</td>
+          <td class="num" [class.win-text]="resultado(e) === true" [class.loss-text]="resultado(e) === false"><b>{{ e.res_local ?? '–' }} – {{ e.res_visitante ?? '–' }}</b></td>
+          <td [style.font-weight]="e.visitante_id === d.equipo.id ? 600 : 400">{{ e.visitante }}</td>
+          <td>@if (resultado(e) !== null) {<p-tag [value]="resultado(e) ? 'G' : 'P'" [severity]="resultado(e) ? 'success' : 'danger'" [rounded]="true" />}</td>
+          <td class="small"><a [routerLink]="['/encuentro', e.id]">acta</a>@if (e.local_id === d.equipo.id || e.visitante_id === d.equipo.id) { · <a [routerLink]="['/alineacion', e.categoria_id, e.jornada]">alineación</a>}</td></tr></ng-template>
+      </p-table>}
+    </div>
+
+    <div class="grid grid-2 section">
+      <div class="card"><h2>Plantilla según la FMP</h2>
+        <p-table [value]="d.plantilla" size="small" [scrollable]="true" scrollHeight="420px">
+          <ng-template #header><tr><th>#</th><th>Jugador</th><th class="num">Pts liga</th><th class="num">PJ</th><th class="num">PG</th><th class="num">PP</th><th class="num">SG</th><th class="num">SP</th></tr></ng-template>
+          <ng-template #body let-j><tr><td>{{ j.orden }}</td><td><a [routerLink]="['/jugador', j.nombre_completo.toLowerCase()]">{{ j.nombre_completo }}</a></td><td class="num">{{ j.puntos }}</td><td class="num">{{ j.pj }}</td><td class="num">{{ j.pg }}</td><td class="num">{{ j.pp }}</td><td class="num">{{ j.sg }}</td><td class="num">{{ j.sp }}</td></tr></ng-template>
+        </p-table></div>
+      <div class="card"><h2>Rendimiento en las actas de esta temporada</h2>
+        @if (!d.jugadores.length) {<div class="empty">Sin partidos todavía.</div>} @else {
+        <p-table [value]="d.jugadores" size="small" [scrollable]="true" scrollHeight="420px" sortField="puntos_ult" [sortOrder]="-1">
+          <ng-template #header><tr><th pSortableColumn="jugador">Jugador</th><th class="num" pSortableColumn="puntos_ult">Pts</th><th class="num" pSortableColumn="pj">PJ</th><th pSortableColumn="pct">Ganados</th><th class="num">Sets</th><th class="num">Casa</th><th class="num">Fuera</th></tr></ng-template>
+          <ng-template #body let-j><tr><td><a [routerLink]="['/jugador', j.key]">{{ j.jugador }}</a></td><td class="num">{{ j.puntos_ult }}</td><td class="num">{{ j.pj }}</td><td><app-pct [v]="j" /></td><td class="num">{{ j.sg }}–{{ j.sp }}</td><td class="num">{{ j.casa_pg }}/{{ j.casa_pj }}</td><td class="num">{{ j.fuera_pg }}/{{ j.fuera_pj }}</td></tr></ng-template>
+        </p-table>}</div>
+    </div>
+    @if (d.parejas.length) {
+    <div class="section card"><h2>Parejas de la temporada</h2>
+      <p-table [value]="d.parejas" size="small" [paginator]="d.parejas.length > 15" [rows]="15" sortField="pj" [sortOrder]="-1">
+        <ng-template #header><tr><th>Pareja</th><th class="num" pSortableColumn="pj">PJ</th><th pSortableColumn="pct">Ganados</th><th class="num">Sets</th><th class="num">Juegos</th></tr></ng-template>
+        <ng-template #body let-p><tr><td>{{ p.j1 }} / {{ p.j2 }}</td><td class="num">{{ p.pj }}</td><td><app-pct [v]="p" /></td><td class="num">{{ p.sg }}–{{ p.sp }}</td><td class="num">{{ p.jg }}–{{ p.jp }}</td></tr></ng-template>
+      </p-table></div>}
+  }
+</div>

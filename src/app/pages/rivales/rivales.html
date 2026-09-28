@@ -1,0 +1,38 @@
+<div class="page">
+  <app-state [loading]="loading()" [error]="error()" />
+  @if (d(); as d) {
+    <div class="page-head"><div><div class="eyebrow">{{ d.temporada.nombre }} · {{ d.temporada.grupo }}</div><h1>Los rivales</h1><p class="sub">Fuerza estimada con el último valor de puntos de cada jugador en las actas y con el rating Elo calculado con todos los partidos del grupo. Las plantillas de esta temporada aparecen cuando la FMP las publica.</p></div></div>
+    <div class="grid grid-2">
+      <div class="card"><h2>Fuerza por puntos FMP</h2><app-chart type="bar" [data]="fuerzaChart()" [options]="hOpts" [height]="360" /></div>
+      <div class="card"><h2>Fuerza por Elo</h2>@if (eloChart().labels.length) {<app-chart type="bar" [data]="eloChart()" [options]="hOpts" [height]="360" />} @else {<div class="empty">Sin datos de partidos todavía.</div>}</div>
+    </div>
+    <div class="section stack">
+      @for (r of d.rivales; track r.id) {
+        <div class="card">
+          <div class="card-head" style="cursor:pointer" (click)="abierto.set(abierto() === r.id ? null : r.id)">
+            <div><h2>{{ r.nombre }}</h2><p class="small muted">{{ r.club }} · {{ r.sede }} · {{ r.pistas }} pistas · delegado {{ r.delegado }}</p></div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <p-tag [value]="'Top10: ' + r.ranking_top10 + ' pts'" severity="secondary" [rounded]="true" />
+              @if (r.elo_medio) {<p-tag [value]="'Elo ' + r.elo_medio" severity="contrast" [rounded]="true" />}
+              @if (r.h2h.pj) {<p-tag [value]="'Contra nosotros: ' + r.h2h.pg + ' ganados de ' + r.h2h.pj" [severity]="r.h2h.pg * 2 >= r.h2h.pj ? 'success' : 'danger'" [rounded]="true" />} @else {<p-tag value="Nunca nos hemos enfrentado" severity="secondary" [rounded]="true" />}
+              <i class="pi" [class.pi-chevron-down]="abierto() !== r.id" [class.pi-chevron-up]="abierto() === r.id"></i>
+            </div>
+          </div>
+          @if (abierto() === r.id) {
+            @if (r.h2h.encuentros.length) {<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">@for (h of r.h2h.encuentros; track h.id) {<a [routerLink]="['/encuentro', h.id]" class="small"><app-gp [gano]="h.gano" /> {{ h.pf }}-{{ h.pc }} {{ h.casa ? 'en casa' : 'fuera' }} ({{ h.fecha }})</a>}</div>}
+            @if (!r.plantilla.length) {<div class="empty">Plantilla aún no publicada.</div>} @else {
+            <p-table [value]="r.plantilla" size="small" sortField="ranking" [sortOrder]="-1">
+              <ng-template #header><tr><th>#</th><th pSortableColumn="nombre_completo">Jugador</th><th class="num" pSortableColumn="ranking">Pts FMP</th><th class="num" pSortableColumn="elo">Elo</th><th class="num" pSortableColumn="puntos">Pts liga</th><th class="num" pSortableColumn="pj">PJ</th><th class="num">PG</th><th class="num">PP</th><th class="num">Sets</th></tr></ng-template>
+              <ng-template #body let-j><tr><td>{{ j.orden }}</td><td>{{ j.nombre_completo }}</td><td class="num"><b>{{ j.ranking ?? '–' }}</b></td><td class="num">{{ j.elo ?? '–' }}</td><td class="num">{{ j.puntos }}</td><td class="num">{{ j.pj }}</td><td class="num">{{ j.pg }}</td><td class="num">{{ j.pp }}</td><td class="num">{{ j.sg }}–{{ j.sp }}</td></tr></ng-template>
+            </p-table>}
+          }
+        </div>
+      }
+    </div>
+    <div class="section card"><h2>Los 25 jugadores con mejor Elo del grupo (mínimo 3 partidos)</h2>
+      <p-table [value]="topElo()" size="small">
+        <ng-template #header><tr><th>#</th><th>Jugador</th><th>Equipo</th><th class="num">Elo</th><th class="num">PJ</th><th class="num">PG</th></tr></ng-template>
+        <ng-template #body let-j let-i="rowIndex"><tr><td>{{ i + 1 }}</td><td>{{ j.jugador }}</td><td class="small muted">{{ j.equipo }}</td><td class="num"><b>{{ j.elo }}</b></td><td class="num">{{ j.pj }}</td><td class="num">{{ j.pg }}</td></tr></ng-template>
+      </p-table></div>
+  }
+</div>
