@@ -18,7 +18,11 @@ import { KpiComponent, SegComponent, StateComponent } from '../../shared/bits';
     .pareja{display:grid;grid-template-columns:70px 1fr 1fr 80px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
     .pareja.t2{background:var(--ball-bg);margin:0 -20px;padding:10px 20px}
     .pareja .o{font-weight:600}.pareja .o small{display:block;color:var(--ink-3);font-weight:400}
-    .disp{display:grid;grid-template-columns:1fr 60px 120px 1fr;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+    .disp{display:grid;grid-template-columns:minmax(140px,1fr) 48px auto minmax(90px,1fr);gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+    .disp input{min-width:0;width:100%}
+    .disp app-seg{white-space:nowrap}
+    .pareja{grid-template-columns:64px minmax(0,1fr) minmax(0,1fr) 60px}
+    @media (max-width:560px){.disp{grid-template-columns:1fr auto;grid-template-rows:auto auto}.disp input{grid-column:1/-1}}
     :host ::ng-deep .p-select{width:100%}
   `],
 })
