@@ -58,8 +58,14 @@ export class EquipoPage {
   partChart = computed(() => { const j = (this.E()?.jugadores || []).slice(0, 20);
     return { labels: j.map((x: any) => x.jugador.split(' ').slice(0, 2).join(' ')), datasets: [{ label: 'Ganados', data: j.map((x: any) => x.pg), backgroundColor: C.win, stack: 'a', borderRadius: 3 }, { label: 'Perdidos', data: j.map((x: any) => x.pj - x.pg), backgroundColor: C.lossSoft, stack: 'a', borderRadius: 3 }] }; });
 
-  /** 'Felipe Del Olmo Lopez' -> 'Felipe Del Olmo'; 'Roberto Ignacio Prieto Perez' -> 'Roberto Prieto' */
-  short(n: string) { const w = n.split(' '); if (w.length <= 2) return n; const i = ['de', 'del', 'la', 'san'].includes(w[1].toLowerCase()) ? 3 : (w.length >= 4 && !['de', 'del', 'la'].includes(w[2].toLowerCase()) ? 2 : 2); return w[0] + ' ' + w.slice(w.length >= 4 && i === 2 ? 2 : 1, w.length >= 4 && i === 2 ? 3 : i).join(' '); }
+  /** Nombre corto: 'Felipe Del Olmo Lopez' -> 'Felipe Del Olmo'; 'Roberto Ignacio Prieto Perez' -> 'Roberto Prieto'; 'Miguel Ruiberriz De Torres' -> 'Miguel Ruiberriz' */
+  short(n: string) {
+    const w = n.split(' '), part = (x: string) => ['de', 'del', 'la', 'las', 'los', 'san'].includes((x || '').toLowerCase());
+    if (w.length <= 2) return n;
+    if (part(w[1])) return w[0] + ' ' + w.slice(1, part(w[2]) ? 4 : 3).join(' ');
+    if (w.length >= 4 && !part(w[2]) && !part(w[3])) return w[0] + ' ' + w[2];
+    return w[0] + ' ' + w[1];
+  }
   eloBarChart = computed(() => { const e = (this.E()?.elo || []).slice(0, 20);
     return { labels: e.map((x: any) => this.short(x.jugador)), datasets: [{ label: 'Elo actual', data: e.map((x: any) => x.elo), backgroundColor: e.map((x: any) => x.elo >= 1000 ? C.ink : C.grey), borderRadius: 4 },
       { label: 'Máximo alcanzado', data: e.map((x: any) => x.max), backgroundColor: C.greySoft, borderRadius: 4 }] }; });
