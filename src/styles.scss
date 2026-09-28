@@ -88,5 +88,26 @@ table.t { border-collapse: collapse; width: 100%; font-size: 13.5px; }
 .loading { padding: 40px; text-align: center; color: var(--ink-3); }
 label.f { display: grid; gap: 6px; font-size: 13px; color: var(--ink-2); }
 
-@media (max-width: 800px) { .page { padding: 18px 14px 50px; } h1 { font-size: 22px; } .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+html { -webkit-text-size-adjust: 100%; }
+.card { min-width: 0; }
+.p-datatable .p-datatable-table-container { overflow-x: auto; }
+@media (max-width: 900px) {
+  .page { padding: 16px 14px 90px; }
+  h1 { font-size: 22px; }
+  .page-head { flex-direction: column; align-items: stretch; margin-bottom: 14px; }
+  .page-head .toolbar { margin: 0; }
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .card { padding: 14px 14px; border-radius: 12px; }
+  .table-wrap, .card .p-datatable { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .t { min-width: 520px; }
+  .card .p-datatable table { min-width: 520px; }
+  input, select, textarea, .p-inputtext { font-size: 16px; }
+  .section { margin-top: 14px; }
+  .eyebrow { flex-wrap: wrap; }
+}
+@media (max-width: 480px) {
+  .kpis { gap: 8px; }
+  .page { padding: 12px 10px 90px; }
+}
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }

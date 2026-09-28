@@ -39,7 +39,7 @@ import { StateComponent } from '../../shared/bits';
     .sum{font-size:12px;color:var(--ink-3)}
     .sets{display:flex;gap:6px}.sets span{padding:4px 8px;border-radius:6px;background:var(--surface-2);font-variant-numeric:tabular-nums;font-weight:600}
     .sets span.w{background:var(--win-bg);color:var(--win)}.sets span.l{background:var(--loss-bg);color:var(--loss)}
-    @media (max-width:700px){.partido{grid-template-columns:1fr;gap:8px}.side.r{text-align:left}}
+    @media (max-width:700px){.partido{grid-template-columns:1fr;gap:8px;padding:12px 14px}.side.r{text-align:left}.side.w::before{left:-8px}.side.r.w::before{right:auto;left:-8px}}
   `],
 })
 export class EncuentroPage {

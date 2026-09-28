@@ -58,6 +58,21 @@ export class EquipoPage {
   partChart = computed(() => { const j = (this.E()?.jugadores || []).slice(0, 20);
     return { labels: j.map((x: any) => x.jugador.split(' ').slice(0, 2).join(' ')), datasets: [{ label: 'Ganados', data: j.map((x: any) => x.pg), backgroundColor: C.win, stack: 'a', borderRadius: 3 }, { label: 'Perdidos', data: j.map((x: any) => x.pj - x.pg), backgroundColor: C.lossSoft, stack: 'a', borderRadius: 3 }] }; });
 
+  /** 'Felipe Del Olmo Lopez' -> 'Felipe Del Olmo'; 'Roberto Ignacio Prieto Perez' -> 'Roberto Prieto' */
+  short(n: string) { const w = n.split(' '); if (w.length <= 2) return n; const i = ['de', 'del', 'la', 'san'].includes(w[1].toLowerCase()) ? 3 : (w.length >= 4 && !['de', 'del', 'la'].includes(w[2].toLowerCase()) ? 2 : 2); return w[0] + ' ' + w.slice(w.length >= 4 && i === 2 ? 2 : 1, w.length >= 4 && i === 2 ? 3 : i).join(' '); }
+  eloBarChart = computed(() => { const e = (this.E()?.elo || []).slice(0, 20);
+    return { labels: e.map((x: any) => this.short(x.jugador)), datasets: [{ label: 'Elo actual', data: e.map((x: any) => x.elo), backgroundColor: e.map((x: any) => x.elo >= 1000 ? C.ink : C.grey), borderRadius: 4 },
+      { label: 'Máximo alcanzado', data: e.map((x: any) => x.max), backgroundColor: C.greySoft, borderRadius: 4 }] }; });
+  eloLineChart = computed(() => { const e = (this.E()?.elo || []).slice().sort((a: any, b: any) => b.pj - a.pj).slice(0, 8);
+    const n = Math.max(...e.map((x: any) => x.hist.length), 1);
+    return { labels: Array.from({ length: n }, (_, i) => i + 1), datasets: e.map((x: any, k: number) => ({ label: this.short(x.jugador), data: x.hist, borderColor: C.series[k % C.series.length], backgroundColor: 'transparent', tension: .25, pointRadius: 0, borderWidth: 2 })) }; });
+  eloScatter = computed(() => { const e = this.E()?.elo || []; const pj = this.E()?.puntos_jornada || {};
+    const pts = (n: string) => { const h = pj[n]; return h?.length ? h[h.length - 1].puntos : null; };
+    const d = e.filter((x: any) => pts(x.jugador) !== null);
+    return { datasets: [{ label: 'jugadores', data: d.map((x: any) => ({ x: pts(x.jugador), y: x.elo, r: 4 + Math.sqrt(x.pj) * 1.5, j: x.jugador })), backgroundColor: d.map((x: any) => x.elo >= 1000 ? C.winSoft : C.lossSoft), borderColor: d.map((x: any) => x.elo >= 1000 ? C.win : C.loss), borderWidth: 1.5 }] }; });
+  eloBarOpts = { indexAxis: 'y' as const, plugins: { legend: { position: 'bottom' as const } }, scales: { x: { min: 800 } } };
+  eloLineOpts = { plugins: { legend: { position: 'bottom' as const } }, interaction: { mode: 'index' as const, intersect: false }, scales: { x: { title: { display: true, text: 'partido nº' } } } };
+  eloScatterOpts = { scales: { x: { title: { display: true, text: 'puntos FMP (último acta)' } }, y: { title: { display: true, text: 'Elo' } } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c: any) => `${c.raw.j}: Elo ${c.raw.y}, ${c.raw.x} pts` } } } };
   pctOpts = { scales: { y: { min: 0, max: 100, ticks: { callback: (v: any) => v + '%' } } }, plugins: { legend: { display: false } } };
   pctOptsH = { indexAxis: 'y' as const, scales: { x: { min: 0, max: 100, ticks: { callback: (v: any) => v + '%' } } }, plugins: { legend: { display: false } } };
   nivelOpts = { scales: { y: { min: 0, max: 100, ticks: { callback: (v: any) => v + '%' } }, y2: { position: 'right' as const, grid: { display: false }, beginAtZero: true } }, plugins: { legend: { position: 'bottom' as const } } };

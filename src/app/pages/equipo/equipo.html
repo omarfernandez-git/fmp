@@ -39,6 +39,16 @@
       <div class="card"><h2>Partidos por jugador</h2><app-chart type="bar" [data]="partChart()" [options]="stackOptsH" [height]="420" /></div>
     </div>
 
+    <div class="section"><h2>Elo de los jugadores</h2><p class="small muted" style="margin:4px 0 10px">Rating calculado con todos los partidos del grupo desde 2023: se gana más venciendo a parejas mejores. 1000 es la media. Es acumulado de todas las temporadas, independientemente del filtro.</p>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr))">
+      <div class="card"><h2>Elo actual y máximo alcanzado</h2><app-chart type="bar" [data]="eloBarChart()" [options]="eloBarOpts" [height]="460" /></div>
+      <div class="card"><h2>Evolución del Elo de los más habituales</h2><app-chart type="line" [data]="eloLineChart()" [options]="eloLineOpts" [height]="300" /></div>
+      <div class="card"><h2>Elo frente a puntos FMP</h2><p class="small muted" style="margin-bottom:6px">Arriba a la izquierda: jugadores que rinden por encima de sus puntos FMP.</p><app-chart type="bubble" [data]="eloScatter()" [options]="eloScatterOpts" [height]="300" /></div>
+      <div class="card"><h2>Tabla de Elo</h2><div class="table-wrap" style="max-height:300px;overflow:auto"><table class="t"><thead><tr><th>#</th><th>Jugador</th><th class="num">Elo</th><th class="num">Máx</th><th class="num">Mín</th><th class="num">PJ</th><th class="num">PG</th></tr></thead><tbody>
+        @for (e of E.elo; track e.key) {<tr><td>{{ $index + 1 }}</td><td><a [routerLink]="['/jugador', e.key]">{{ e.jugador }}</a></td><td class="num"><b>{{ e.elo }}</b></td><td class="num">{{ e.max }}</td><td class="num">{{ e.min }}</td><td class="num">{{ e.pj }}</td><td class="num">{{ e.pg }}</td></tr>}
+      </tbody></table></div></div>
+    </div></div>
+
     <div class="grid grid-2 section">
       <div class="card"><h2>Detalle de partidos</h2><table class="t"><tbody>
         <tr><td>Sets ganados – perdidos</td><td class="num">{{ P().sg }} – {{ P().sp }}</td></tr>
