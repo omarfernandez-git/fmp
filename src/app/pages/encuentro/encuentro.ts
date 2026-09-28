@@ -1,12 +1,13 @@
 import { Component, effect, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TagModule } from 'primeng/tag';
+import { ButtonModule } from 'primeng/button';
 import { ApiService } from '../../core/api.service';
 import { StateComponent } from '../../shared/bits';
 
 @Component({
   selector: 'app-encuentro',
-  imports: [RouterLink, TagModule, StateComponent],
+  imports: [RouterLink, TagModule, ButtonModule, StateComponent],
   template: `
     <div class="page">
       <app-state [loading]="loading()" [error]="error()" />
@@ -14,7 +15,7 @@ import { StateComponent } from '../../shared/bits';
         <div class="page-head"><div><div class="eyebrow">Acta · jornada {{ e.jornada }} · {{ e.fecha }} · {{ e.tipo_turno }}</div>
           <h1><span [class.win-text]="e.res_local > e.res_visitante && e.propio_local" [class.loss-text]="e.res_local < e.res_visitante && e.propio_local">{{ e.local }}</span> <span class="muted">{{ e.res_local }} – {{ e.res_visitante }}</span> <span [class.win-text]="e.res_visitante > e.res_local && e.propio_visitante" [class.loss-text]="e.res_visitante < e.res_local && e.propio_visitante">{{ e.visitante }}</span></h1>
           <p class="sub">Se juega en {{ e.club_org }} · <a [href]="'https://www.fmpadel.com/ligas_detalleResultadoT3.aspx?idCategoria=' + e.categoria_id + '&idResultado=' + e.id" target="_blank" rel="noopener">ver en fmpadel.com <i class="pi pi-external-link" style="font-size:11px"></i></a></p></div>
-          <a [routerLink]="['/alineacion', e.categoria_id, e.jornada]" class="p-button p-button-outlined p-button-sm">Alineación de esta jornada</a></div>
+          <p-button label="Alineación de esta jornada" size="small" [outlined]="true" severity="secondary" [routerLink]="['/alineacion', e.categoria_id, e.jornada]" /></div>
         @if (!e.partidos.length) {<div class="empty">El acta todavía no está publicada.</div>}
         <div class="stack">
           @for (p of e.partidos; track p.orden) {

@@ -17,7 +17,7 @@ import { TagModule } from 'primeng/tag';
   styles: [`
     .kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;display:grid;gap:8px}
     .top{display:flex;justify-content:space-between;align-items:center}
-    .l{font-size:13px;color:var(--ink-2)}
+    .l{font-size:13px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .ic{width:34px;height:34px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-2);font-size:14px}
     .v{font-size:22px;font-weight:600;letter-spacing:-.02em;line-height:1.1;display:flex;align-items:baseline;gap:6px;min-height:26px}
     .v.win{color:var(--win)} .v.loss{color:var(--loss)}

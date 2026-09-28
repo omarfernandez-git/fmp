@@ -3,7 +3,7 @@
   @if (d(); as d) {
     <div class="page-head">
       <div><div class="eyebrow">Temporada {{ d.temporada.temporada }}</div><h1>{{ d.temporada.nombre }} · {{ d.temporada.grupo }}</h1><p class="sub">{{ d.equipo.nombre }} · <a [routerLink]="['/rivales', d.temporada.id]">ver rivales</a> · <a [routerLink]="['/alineacion', d.temporada.id, 1]">preparar alineación</a></p></div>
-      <div class="toolbar" style="margin:0">@for (t of temps(); track t.id) {<a [routerLink]="['/temporada', t.id]" class="p-button p-button-sm" [class.p-button-outlined]="t.id !== d.temporada.id">{{ t.temporada }}</a>}</div>
+      <div class="toolbar" style="margin:0">@for (t of temps(); track t.id) {<p-button [label]="t.temporada" size="small" [outlined]="t.id !== d.temporada.id" [severity]="t.id !== d.temporada.id ? 'secondary' : 'primary'" [routerLink]="['/temporada', t.id]" />}</div>
     </div>
     <div class="kpis">
       <app-kpi label="Encuentros jugados" [value]="resumen().pj" icon="pi-calendar" [sub]="resumen().pendientes + ' pendientes'" />

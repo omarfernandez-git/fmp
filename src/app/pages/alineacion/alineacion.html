@@ -4,7 +4,7 @@
     <div class="page-head">
       <div><div class="eyebrow">{{ d.temporada.temporada }} · {{ d.temporada.grupo }}</div><h1>Alineación · jornada {{ d.jornada }}</h1>
         @if (d.encuentro) {<p class="sub"><b>{{ d.encuentro.local }}</b> contra <b>{{ d.encuentro.visitante }}</b> · {{ d.encuentro.fecha || 'fecha pendiente' }} · {{ d.encuentro.local_id === d.equipo.id ? 'en casa' : 'fuera' }}@if (d.encuentro.res_local !== null) { · ya jugado {{ d.encuentro.res_local }}–{{ d.encuentro.res_visitante }}, <a [routerLink]="['/encuentro', d.encuentro.id]">ver acta</a>}</p>} @else {<p class="sub">Calendario aún no publicado para esta jornada.</p>}</div>
-      <div class="toolbar" style="margin:0;max-width:560px">@for (j of d.jornadas; track j) {<a [routerLink]="['/alineacion', d.temporada.id, j]" class="p-button p-button-sm p-button-rounded" [class.p-button-outlined]="j !== d.jornada" style="padding:4px 10px">{{ j }}</a>}</div>
+      <div class="toolbar jornadas" style="margin:0;max-width:600px;gap:6px">@for (j of d.jornadas; track j) {<p-button [label]="'' + j" size="small" [rounded]="true" [outlined]="j !== d.jornada" [severity]="j !== d.jornada ? 'secondary' : 'primary'" [routerLink]="['/alineacion', d.temporada.id, j]" />}</div>
     </div>
     @if (d.jugadores[0]?.plantilla_de) {<div style="display:block;margin-bottom:14px"><p-message severity="warn" text="La FMP aún no ha publicado la plantilla de esta temporada; se usa la de la liga anterior." /></div>}
     @if (msg()) {<div style="display:block;margin-bottom:14px"><p-message severity="success" [text]="msg()" /></div>}

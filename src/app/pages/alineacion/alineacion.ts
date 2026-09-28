@@ -24,6 +24,7 @@ import { KpiComponent, SegComponent, StateComponent } from '../../shared/bits';
     .pareja{grid-template-columns:64px minmax(0,1fr) minmax(0,1fr) 60px}
     @media (max-width:560px){.disp{grid-template-columns:1fr auto;grid-template-rows:auto auto}.disp input{grid-column:1/-1}}
     :host ::ng-deep .p-select{width:100%}
+    :host ::ng-deep .jornadas .p-button{min-width:34px;padding:4px 8px}
   `],
 })
 export class AlineacionPage {

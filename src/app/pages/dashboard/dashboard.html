@@ -5,9 +5,9 @@
       <div><div class="eyebrow">{{ d.temporada.nombre }} · {{ d.temporada.grupo }} <p-tag [value]="d.encuentros.length ? 'En juego' : 'Pretemporada'" [severity]="d.encuentros.length ? 'success' : 'secondary'" [rounded]="true" /></div>
         <h1>{{ d.equipo.nombre }}</h1><p class="sub">{{ d.equipo.sede }} · {{ d.equipo.pistas }} pistas · delegado {{ d.equipo.delegado }}</p></div>
       <div class="toolbar" style="margin:0">
-        <a [routerLink]="['/alineacion', d.temporada.id, 1]" class="p-button p-button-sm"><i class="pi pi-th-large" style="margin-right:6px"></i>Preparar alineación</a>
-        <a [routerLink]="['/rivales', d.temporada.id]" class="p-button p-button-sm p-button-outlined">Rivales</a>
-        <a [routerLink]="['/temporada', d.temporada.id]" class="p-button p-button-sm p-button-outlined">Calendario</a>
+        <p-button label="Preparar alineación" icon="pi pi-th-large" size="small" [routerLink]="['/alineacion', d.temporada.id, 1]" />
+        <p-button label="Rivales" size="small" [outlined]="true" severity="secondary" [routerLink]="['/rivales', d.temporada.id]" />
+        <p-button label="Calendario" size="small" [outlined]="true" severity="secondary" [routerLink]="['/temporada', d.temporada.id]" />
       </div>
     </div>
 
@@ -16,7 +16,7 @@
       <app-kpi label="Encuentros" [value]="d.resumen.pg + ' – ' + d.resumen.pp" icon="pi-calendar" [sub]="d.resumen.pj ? d.resumen.pct + '% ganados' : 'sin jugar'" [tag]="d.resumen.pj ? (d.resumen.pct >= 50 ? 'Positivo' : 'Negativo') : null" [tagSeverity]="d.resumen.pct >= 50 ? 'success' : 'danger'" />
       <app-kpi label="Casa · fuera" [value]="d.resumen.casa.pg + '/' + d.resumen.casa.pj + ' · ' + d.resumen.fuera.pg + '/' + d.resumen.fuera.pj" icon="pi-home" sub="encuentros ganados" />
       <app-kpi label="Partidos de pareja" [value]="d.partidos.pj ? d.partidos.pct + '%' : '–'" icon="pi-percentage" [sub]="d.partidos.pg + ' ganados de ' + d.partidos.pj" />
-      <app-kpi label="Forma" icon="pi-bolt" [sub]="d.resumen.racha_actual > 0 ? d.resumen.racha_actual + ' victorias seguidas' : d.resumen.racha_actual < 0 ? (-d.resumen.racha_actual) + ' derrotas seguidas' : ''"><app-form [forma]="d.resumen.forma" /></app-kpi>
+      <app-kpi label="Forma" icon="pi-bolt" [value]="d.resumen.forma ? '' : '–'" [sub]="d.resumen.racha_actual > 0 ? d.resumen.racha_actual + ' victorias seguidas' : d.resumen.racha_actual < 0 ? (-d.resumen.racha_actual) + ' derrotas seguidas' : (d.resumen.forma ? '' : 'sin encuentros todavía')">@if (d.resumen.forma) {<app-form [forma]="d.resumen.forma" />}</app-kpi>
     </div>
 
     @if (strip(); as s) {

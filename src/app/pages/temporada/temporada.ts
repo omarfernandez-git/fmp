@@ -2,13 +2,14 @@ import { Component, computed, effect, inject, input, signal } from '@angular/cor
 import { RouterLink } from '@angular/router';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
+import { ButtonModule } from 'primeng/button';
 import { ApiService } from '../../core/api.service';
 import { ChartComponent, C } from '../../shared/chart';
 import { KpiComponent, PctComponent, SegComponent, StateComponent } from '../../shared/bits';
 
 @Component({
   selector: 'app-temporada',
-  imports: [RouterLink, TableModule, TagModule, ChartComponent, KpiComponent, PctComponent, SegComponent, StateComponent],
+  imports: [RouterLink, TableModule, TagModule, ButtonModule, ChartComponent, KpiComponent, PctComponent, SegComponent, StateComponent],
   templateUrl: './temporada.html',
 })
 export class TemporadaPage {
