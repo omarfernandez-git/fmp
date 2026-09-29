@@ -2,9 +2,11 @@
   <app-state [loading]="loading()" [error]="error()" />
   @if (d(); as d) {
     <div class="page-head"><div><div class="eyebrow">{{ d.temporada.nombre }} · {{ d.temporada.grupo }}</div><h1>Los rivales</h1><p class="sub">Fuerza estimada con el último valor de puntos de cada jugador en las actas y con el rating Elo calculado con todos los partidos del grupo. Las plantillas de esta temporada aparecen cuando la FMP las publica.</p></div></div>
-    <div class="grid grid-2">
-      <div class="card"><h2>Fuerza por puntos FMP</h2><app-chart type="bar" [data]="fuerzaChart()" [options]="hOpts" [height]="360" /></div>
-      <div class="card"><h2>Fuerza por Elo</h2>@if (eloChart().labels.length) {<app-chart type="bar" [data]="eloChart()" [options]="hOpts" [height]="360" />} @else {<div class="empty">Sin datos de partidos todavía.</div>}</div>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr))">
+      <div class="card"><h2>Rango de Elo de cada equipo</h2><p class="small muted" style="margin-bottom:6px">Barra: del peor al mejor jugador visto en actas con ese equipo. Rombo: media de sus 8 mejores. El nuestro en turquesa.</p>@if (equipos().length) {<app-chart type="bar" [data]="rangoChart()" [options]="rangoOpts" [height]="420" />} @else {<div class="empty">Sin partidos de estos equipos en las actas descargadas.</div>}</div>
+      <div class="card"><h2>Evolución del Elo de los mejores del grupo</h2><p class="small muted" style="margin-bottom:6px">Los ocho jugadores con más Elo del grupo (mínimo 6 partidos), partido a partido.</p><app-chart type="line" [data]="evolChart()" [options]="evolOpts" [height]="420" /></div>
+      @if (hayPuntos()) {<div class="card"><h2>Fuerza por puntos FMP</h2><p class="small muted" style="margin-bottom:6px">Suma de los puntos FMP de los 10 mejores de cada plantilla publicada.</p><app-chart type="bar" [data]="fuerzaChart()" [options]="hOpts" [height]="360" /></div>}
+      <div class="card"><h2>Fuerza por Elo</h2><p class="small muted" style="margin-bottom:6px">Elo medio de los 8 mejores jugadores de cada rival.</p>@if (eloChart().labels.length) {<app-chart type="bar" [data]="eloChart()" [options]="hOpts" [height]="360" />} @else {<div class="empty">Sin datos de partidos todavía.</div>}</div>
     </div>
     <div class="section stack">
       @for (r of d.rivales; track r.id) {
@@ -12,7 +14,8 @@
           <div class="card-head" style="cursor:pointer" (click)="abierto.set(abierto() === r.id ? null : r.id)">
             <div><h2>{{ r.nombre }}</h2><p class="small muted">{{ r.club }} · {{ r.sede }} · {{ r.pistas }} pistas · delegado {{ r.delegado }}</p></div>
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-              <p-tag [value]="'Top10: ' + r.ranking_top10 + ' pts'" severity="secondary" [rounded]="true" />
+              @if (r.ranking_top10) {<p-tag [value]="'Top10: ' + r.ranking_top10 + ' pts'" severity="secondary" [rounded]="true" />}
+              @if (r.elo_resumen.n) {<p-tag [value]="r.elo_resumen.n + ' jugadores vistos en actas'" severity="secondary" [rounded]="true" />}
               @if (r.elo_medio) {<p-tag [value]="'Elo ' + r.elo_medio" severity="contrast" [rounded]="true" />}
               @if (r.h2h.pj) {<p-tag [value]="'Contra nosotros: ' + r.h2h.pg + ' ganados de ' + r.h2h.pj" [severity]="r.h2h.pg * 2 >= r.h2h.pj ? 'success' : 'danger'" [rounded]="true" />} @else {<p-tag value="Nunca nos hemos enfrentado" severity="secondary" [rounded]="true" />}
               <i class="pi" [class.pi-chevron-down]="abierto() !== r.id" [class.pi-chevron-up]="abierto() === r.id"></i>
@@ -20,7 +23,9 @@
           </div>
           @if (abierto() === r.id) {
             @if (r.h2h.encuentros.length) {<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">@for (h of r.h2h.encuentros; track h.id) {<a [routerLink]="['/encuentro', h.id]" class="small"><app-gp [gano]="h.gano" /> {{ h.pf }}-{{ h.pc }} {{ h.casa ? 'en casa' : 'fuera' }} ({{ h.fecha }})</a>}</div>}
-            @if (!r.plantilla.length) {<div class="empty">Plantilla aún no publicada.</div>} @else {
+            @if (r.elo_jugadores.length) {<div class="grid grid-2" style="margin-bottom:12px"><div><h3 style="margin-bottom:6px">Elo de sus jugadores (según las actas)</h3><app-chart type="bar" [data]="rivalEloChart(r)" [options]="rivalEloOpts" [height]="Math.max(160, 26 * Math.min(14, r.elo_jugadores.length))" /></div>
+              <div><h3 style="margin-bottom:6px">Sus jugadores en las actas</h3><div class="table-wrap" style="max-height:340px;overflow:auto"><table class="t"><thead><tr><th>Jugador</th><th class="num">Elo</th><th class="num">PJ</th><th class="num">PG</th></tr></thead><tbody>@for (j of r.elo_jugadores; track j.key) {<tr><td>{{ j.jugador }}</td><td class="num"><b>{{ j.elo }}</b></td><td class="num">{{ j.pj }}</td><td class="num">{{ j.pg }}</td></tr>}</tbody></table></div></div></div>}
+            @if (!r.plantilla.length) {<div class="empty">Plantilla oficial aún no publicada por la FMP.</div>} @else {
             <p-table [value]="r.plantilla" size="small" sortField="ranking" [sortOrder]="-1">
               <ng-template #header><tr><th>#</th><th pSortableColumn="nombre_completo">Jugador</th><th class="num" pSortableColumn="ranking">Pts FMP</th><th class="num" pSortableColumn="elo">Elo</th><th class="num" pSortableColumn="puntos">Pts liga</th><th class="num" pSortableColumn="pj">PJ</th><th class="num">PG</th><th class="num">PP</th><th class="num">Sets</th></tr></ng-template>
               <ng-template #body let-j><tr><td>{{ j.orden }}</td><td>{{ j.nombre_completo }}</td><td class="num"><b>{{ j.ranking ?? '–' }}</b></td><td class="num">{{ j.elo ?? '–' }}</td><td class="num">{{ j.puntos }}</td><td class="num">{{ j.pj }}</td><td class="num">{{ j.pg }}</td><td class="num">{{ j.pp }}</td><td class="num">{{ j.sg }}–{{ j.sp }}</td></tr></ng-template>
