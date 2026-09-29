@@ -13,6 +13,7 @@
     </nav>
     <div class="bottom">
       <button class="ic" (click)="actualizar()" [disabled]="refresh().running" [pTooltip]="refresh().running ? 'Actualizando…' : 'Actualizar datos desde la FMP'" tooltipPosition="right"><i class="pi" [class.pi-refresh]="true" [class.pi-spin]="refresh().running"></i></button>
+      @if (auth.user()?.admin) {<a routerLink="/admin" routerLinkActive="on" pTooltip="Administración: usuarios" tooltipPosition="right"><i class="pi pi-cog"></i></a>}
       <a routerLink="/cuenta" routerLinkActive="on" pTooltip="Tu cuenta" tooltipPosition="right"><i class="pi pi-user"></i></a>
       <button class="ic" (click)="salir()" pTooltip="Salir" tooltipPosition="right"><i class="pi pi-sign-out"></i></button>
     </div>

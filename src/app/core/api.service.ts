@@ -13,4 +13,5 @@ export class ApiService {
     return firstValueFrom(this.http.get<T>(`${API}${path}`, { params: p }));
   }
   post<T>(path: string, body: any = {}) { return firstValueFrom(this.http.post<T>(`${API}${path}`, body)); }
+  delete<T>(path: string) { return firstValueFrom(this.http.delete<T>(`${API}${path}`)); }
 }

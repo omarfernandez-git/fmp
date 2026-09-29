@@ -1,0 +1,46 @@
+<div class="page">
+  <p-confirmdialog />
+  <div class="page-head"><div><div class="eyebrow">Administración</div><h1>Usuarios</h1><p class="sub">Quién puede entrar en la web. Los administradores además pueden gestionar usuarios.</p></div></div>
+  <app-state [loading]="loading()" [error]="error()" />
+  <div class="kpis">
+    <app-kpi label="Usuarios" [value]="usuarios().length" icon="pi-users" />
+    <app-kpi label="Activos" [value]="activos()" icon="pi-check-circle" />
+    <app-kpi label="Administradores" [value]="admins()" icon="pi-shield" />
+  </div>
+  @if (msg()) {<div style="margin-bottom:12px"><p-message [severity]="err() ? 'error' : 'success'" [text]="msg()" /></div>}
+  @if (cred(); as c) {
+    <div class="cred" style="margin-bottom:14px"><i class="pi pi-key"></i><span>Contraseña {{ c.generada ? 'generada' : '' }} para <b>{{ c.email }}</b>:</span><code>{{ c.password }}</code>
+      <p-button icon="pi pi-copy" label="Copiar" size="small" [text]="true" (onClick)="copiar(c.password)" /><span class="small muted">Pásasela por un canal seguro; no se volverá a mostrar.</span>
+      <p-button icon="pi pi-times" size="small" [text]="true" severity="secondary" (onClick)="cred.set(null)" /></div>
+  }
+  <div class="card" style="margin-bottom:16px"><h2>Añadir usuario</h2>
+    <form class="form" (ngSubmit)="crear()">
+      <label class="f">Email <input pInputText type="email" name="email" [(ngModel)]="nuevo.email" required placeholder="nombre@correo.com"></label>
+      <label class="f">Nombre <input pInputText name="nombre" [(ngModel)]="nuevo.nombre" placeholder="opcional"></label>
+      <label class="f">Contraseña <p-password name="password" [(ngModel)]="nuevo.password" [feedback]="false" [toggleMask]="true" placeholder="vacío = generar una" autocomplete="new-password" /></label>
+      <div style="display:flex;gap:8px;align-items:center;padding-bottom:8px"><p-checkbox name="admin" [(ngModel)]="nuevo.admin" [binary]="true" inputId="adm" /><label for="adm" class="small">Administrador</label></div>
+      <p-button type="submit" label="Crear usuario" icon="pi pi-user-plus" [disabled]="!nuevo.email" />
+    </form>
+  </div>
+  <div class="card">
+    <p-table [value]="usuarios()" size="small" dataKey="email">
+      <ng-template #header><tr><th>Email</th><th>Nombre</th><th>Estado</th><th>Rol</th><th>Creado</th><th>Último acceso</th><th></th></tr></ng-template>
+      <ng-template #body let-u>
+        <tr [style.opacity]="u.activo ? 1 : .55">
+          <td>{{ u.email }} @if (esYo(u)) {<p-tag value="tú" severity="secondary" [rounded]="true" />}</td>
+          <td>{{ u.nombre }}</td>
+          <td><p-tag [value]="u.activo ? 'Activo' : 'Desactivado'" [severity]="u.activo ? 'success' : 'danger'" [rounded]="true" /></td>
+          <td><p-tag [value]="u.admin ? 'Administrador' : 'Usuario'" [severity]="u.admin ? 'contrast' : 'secondary'" [rounded]="true" /></td>
+          <td class="small muted">{{ (u.creado || '').slice(0, 10) }}</td>
+          <td class="small muted">{{ u.ultimo_acceso ? u.ultimo_acceso.replace('T', ' ').slice(0, 16) : 'nunca' }}</td>
+          <td><div class="acciones">
+            <p-button icon="pi pi-key" size="small" [text]="true" pTooltip="Restablecer contraseña" (onClick)="resetear(u)" />
+            <p-button [icon]="u.admin ? 'pi pi-shield' : 'pi pi-user'" size="small" [text]="true" [disabled]="esYo(u)" [pTooltip]="u.admin ? 'Quitar administrador' : 'Hacer administrador'" (onClick)="cambiar(u, { admin: !u.admin }, u.admin ? 'Ya no es administrador' : 'Ahora es administrador')" />
+            <p-button [icon]="u.activo ? 'pi pi-ban' : 'pi pi-check'" size="small" [text]="true" [disabled]="esYo(u)" [pTooltip]="u.activo ? 'Desactivar acceso' : 'Reactivar acceso'" (onClick)="cambiar(u, { activo: !u.activo }, u.activo ? 'Acceso desactivado' : 'Acceso reactivado')" />
+            <p-button icon="pi pi-trash" size="small" [text]="true" severity="danger" [disabled]="esYo(u)" pTooltip="Borrar" (onClick)="borrar(u)" />
+          </div></td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>

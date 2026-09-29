@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { API } from './api.service';
 
-export interface User { email: string; nombre?: string; }
+export interface User { email: string; nombre?: string; admin?: boolean; }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
