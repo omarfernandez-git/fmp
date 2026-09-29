@@ -56,7 +56,7 @@ p { margin: 0; }
 .card > h2 { margin-bottom: 12px; font-size: 15px; }
 
 /* kpis */
-.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 16px; align-items: stretch; }
 .t td:first-child, .t th:first-child { white-space: nowrap; }
 .bar + .small { margin-left: 6px; }
 

@@ -15,14 +15,15 @@ import { TagModule } from 'primeng/tag';
       <div class="bottom"><span class="sub">{{ sub() }}</span>@if (tag()) {<p-tag [value]="tag()!" [severity]="tagSeverity()" [rounded]="true" />}</div>
     </div>`,
   styles: [`
-    .kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;display:grid;gap:8px}
-    .top{display:flex;justify-content:space-between;align-items:center}
-    .l{font-size:13px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .ic{width:34px;height:34px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-2);font-size:14px}
+    :host{display:block;height:100%}
+    .kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;display:grid;grid-template-rows:auto 1fr auto;gap:8px;height:100%;box-sizing:border-box}
+    .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;min-height:34px}
+    .l{font-size:13px;color:var(--ink-2);line-height:1.3;flex:1;min-width:0;padding-top:2px}
+    .ic{width:34px;height:34px;flex:0 0 auto;border-radius:10px;background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-2);font-size:14px}
     .v{font-size:22px;font-weight:600;letter-spacing:-.02em;line-height:1.1;display:flex;align-items:baseline;gap:6px;min-height:26px}
     .v.win{color:var(--win)} .v.loss{color:var(--loss)}
-    .bottom{display:flex;justify-content:space-between;align-items:center;min-height:22px}
-    .sub{font-size:12.5px;color:var(--ink-3)}
+    .bottom{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;min-height:22px}
+    .sub{font-size:12.5px;color:var(--ink-3);line-height:1.3}
   `],
 })
 export class KpiComponent {
