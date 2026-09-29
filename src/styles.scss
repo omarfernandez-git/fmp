@@ -39,7 +39,7 @@ p { margin: 0; }
 .loss-text { color: var(--loss); font-weight: 600; }
 
 /* layout */
-.page { padding: 26px 30px 56px; max-width: 1360px; }
+.page { padding: 26px 30px 56px; }
 .eyebrow { font-size: 13px; color: var(--ink-2); display: flex; align-items: center; gap: 8px; }
 .page-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
 .page-head .sub { color: var(--ink-2); margin-top: 6px; }
