@@ -22,7 +22,7 @@ import { KpiComponent, SegComponent, StateComponent } from '../../shared/bits';
     .disp input{min-width:0;width:100%}
     .disp app-seg{white-space:nowrap}
     .pareja{grid-template-columns:64px minmax(0,1fr) minmax(0,1fr) 60px}
-    @media (max-width:640px){.disp{grid-template-columns:1fr 48px auto}.disp input{grid-column:1/-1}.pareja{grid-template-columns:64px 1fr 60px;row-gap:6px}.pareja p-select:nth-of-type(2){grid-column:2}.pareja .num{grid-column:3;grid-row:1}.pareja.t2{margin:0 -14px;padding:10px 14px}}
+    @media (max-width:640px){.disp.head{display:none}.disp{grid-template-columns:1fr 48px auto}.disp input{grid-column:1/-1}.pareja{grid-template-columns:64px 1fr 60px;row-gap:6px}.pareja p-select:nth-of-type(2){grid-column:2}.pareja .num{grid-column:3;grid-row:1}.pareja.t2{margin:0 -14px;padding:10px 14px}}
     :host ::ng-deep .p-select{width:100%}
     :host ::ng-deep .jornadas .p-button{min-width:34px;padding:4px 8px}
   `],

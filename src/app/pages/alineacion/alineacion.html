@@ -18,7 +18,7 @@
       <div class="card">
         <div class="card-head"><h2>1 · Quién puede jugar</h2><p-button label="Guardar disponibilidad" size="small" (onClick)="guardarDisp()" /></div>
         <p class="small muted" style="margin-bottom:8px">Los puntos son los oficiales si están disponibles, si no el último valor visto en un acta. Pulsa el nombre para fijar puntos manuales.</p>
-        <div class="disp" style="border-bottom:2px solid var(--line)"><b class="small">Jugador</b><b class="small num">Pts</b><b class="small">Disponible</b><b class="small">Nota</b></div>
+        <div class="disp head" style="border-bottom:2px solid var(--line)"><b class="small">Jugador</b><b class="small num">Pts</b><b class="small">Disponible</b><b class="small">Nota</b></div>
         @for (j of d.jugadores; track j.key) {
           <div class="disp" [style.opacity]="j.activo ? 1 : .45">
             <div><a [routerLink]="['/jugador', j.key]">{{ j.jugador }}</a><br><span class="small muted">{{ j.pg }}/{{ j.pj }} ganados · {{ j.origen }}</span></div>

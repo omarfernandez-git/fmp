@@ -76,7 +76,7 @@ table.t { border-collapse: collapse; width: 100%; font-size: 13.5px; }
 .form i { width: 8px; height: 16px; border-radius: 2px; background: var(--line); display: inline-block; }
 .form i.g { background: var(--win); }
 .form i.p { background: var(--loss); }
-.bar { display: inline-grid; grid-template-columns: 70px auto; gap: 8px; align-items: center; }
+.bar { display: inline-grid; grid-template-columns: 56px auto; gap: 6px; align-items: center; vertical-align: middle; }
 .bar .track { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
 .bar .track i { display: block; height: 100%; background: var(--ink); }
 .bar .track i.win { background: var(--win); }
@@ -89,7 +89,7 @@ table.t { border-collapse: collapse; width: 100%; font-size: 13.5px; }
 label.f { display: grid; gap: 6px; font-size: 13px; color: var(--ink-2); }
 
 html { -webkit-text-size-adjust: 100%; }
-.card { min-width: 0; }
+.card { min-width: 0; overflow-x: auto; }
 .p-datatable .p-datatable-table-container { overflow-x: auto; }
 @media (max-width: 900px) {
   .page { padding: 16px 14px 90px; }
@@ -100,11 +100,13 @@ html { -webkit-text-size-adjust: 100%; }
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .card { padding: 14px 14px; border-radius: 12px; }
   .table-wrap, .card .p-datatable { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .t { min-width: 520px; }
-  .card .p-datatable table { min-width: 520px; }
+  .t th, .t td { padding: 8px 8px; }
+  .p-datatable .p-datatable-thead > tr > th, .p-datatable .p-datatable-tbody > tr > td { white-space: nowrap; }
   input, select, textarea, .p-inputtext { font-size: 16px; }
   .section { margin-top: 14px; }
   .eyebrow { flex-wrap: wrap; }
+  .p-selectbutton { flex-wrap: wrap; }
+  .p-selectbutton .p-togglebutton { flex: 1 1 auto; }
 }
 @media (max-width: 480px) {
   .kpis { gap: 8px; }

@@ -17,8 +17,8 @@ Chart.defaults.plugins.tooltip.cornerRadius = 8;
 export const C = {
   s1: '#64748B', s2: '#94A3B8', s3: '#CBD5E1', s4: '#E2E8F0', ink: '#0F172A', ink2: '#475569',
   win: '#16A34A', winSoft: 'rgba(22,163,74,.22)', loss: '#DC2626', lossSoft: 'rgba(220,38,38,.22)',
-  ball: '#CDE84A', ballDeep: '#9DB81C', grey: '#CBD5E1', greySoft: '#E2E8F0', accent: '#0F172A',
-  series: ['#0F172A', '#64748B', '#94A3B8', '#CBD5E1', '#16A34A', '#2563EB', '#9DB81C', '#DC2626', '#7C3AED', '#EA580C'],
+  ball: '#4FCFC0', ballDeep: '#2BB5A5', grey: '#CBD5E1', greySoft: '#E2E8F0', accent: '#0F172A',
+  series: ['#0F172A', '#64748B', '#94A3B8', '#CBD5E1', '#16A34A', '#2563EB', '#2BB5A5', '#DC2626', '#7C3AED', '#EA580C'],
 };
 
 @Component({
