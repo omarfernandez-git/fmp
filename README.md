@@ -11,16 +11,15 @@ npm install
 npm start            # http://localhost:4200, con proxy de /api hacia http://127.0.0.1:8000 (fmp-api en marcha)
 ```
 
-## Producción
+## Producción (apache02 · https://mv.greensysit.net)
 
 ```bash
-npm run build        # genera dist/frontend/browser
+npm run build                      # dist/frontend/browser -> se sube a /var/www/html/fmp
 ```
 
-La API de `fmp-api` sirve esa carpeta directamente (variable `FMP_DIST`, por defecto `../fmp/dist/frontend/browser`),
-así que basta con desplegar los dos repositorios uno junto al otro y arrancar la API detrás de nginx con TLS.
-Si prefieres servir la web desde nginx, apunta `root` a `dist/frontend/browser`, añade `try_files $uri /index.html`
-y haz `proxy_pass` de `/api` a la API.
+Apache sirve esa carpeta como sitio estático (con reescritura a `index.html` para las rutas de la app) y hace de
+proxy de `/api` hacia la API de `fmp-api` en `127.0.0.1:8000`. Configuración en `fmp-api/deploy/apache-mv.greensysit.net.conf`.
+Para subir web y API de una vez: `fmp-api/deploy/deploy.sh apache02`.
 
 ## Páginas
 
