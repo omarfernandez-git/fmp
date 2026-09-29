@@ -54,30 +54,45 @@ export class FormComponent { forma = input(''); chars = computed(() => this.form
 @Component({ selector: 'app-gp', imports: [TagModule], template: `<p-tag [value]="gano() ? 'Ganado' : 'Perdido'" [severity]="gano() ? 'success' : 'danger'" [rounded]="true" />` })
 export class GpComponent { gano = input(false); }
 
-/** Tira de temporada: un bloque por encuentro, altura = margen del marcador. */
+/** Tira de temporada: un bloque por encuentro. Ganados hacia arriba (verde), perdidos hacia abajo (rojo); la altura es el margen. */
 @Component({
   selector: 'app-season-strip',
   imports: [RouterLink],
   template: `
     <div class="strip" [class.dense]="encuentros().length > 30">
       @for (e of encuentros(); track e.encuentro_id ?? $index) {
-        <a class="blk" [class.g]="e.gano" [routerLink]="e.encuentro_id ? ['/encuentro', e.encuentro_id] : null"
-           [title]="'J' + e.jornada + ' · ' + (e.casa ? 'casa' : 'fuera') + ' · ' + e.rival + ' · ' + e.pf + '-' + e.pc">
-          <i [style.height.%]="22 + 15 * (e.pf - e.pc) * (e.gano ? 1 : -1)"></i><span>{{ e.jornada }}</span>
+        <a class="col" [routerLink]="e.encuentro_id ? ['/encuentro', e.encuentro_id] : null"
+           [title]="'Jornada ' + e.jornada + ' · ' + (e.casa ? 'en casa' : 'fuera') + ' contra ' + e.rival + ' · ' + (e.gano ? 'ganado' : 'perdido') + ' ' + e.pf + '-' + e.pc">
+          <div class="up">@if (e.gano) {<i class="g" [style.height.%]="alto(e)"><span>{{ e.pf }}-{{ e.pc }}</span></i>}</div>
+          <div class="down">@if (!e.gano) {<i class="p" [style.height.%]="alto(e)"><span>{{ e.pf }}-{{ e.pc }}</span></i>}</div>
+          <b>{{ e.jornada }}</b>
         </a>
       }
-    </div>`,
+    </div>
+    <div class="leyenda small muted"><span><i class="g"></i> ganado, hacia arriba</span><span><i class="p"></i> perdido, hacia abajo</span><span>Cuanto más largo el bloque, mayor la diferencia (5-0 es el máximo). Pulsa un bloque para abrir el acta.</span></div>`,
   styles: [`
-    .strip{display:flex;gap:5px;align-items:flex-end;height:100px;padding-top:6px}
-    .blk{flex:1 1 0;min-width:10px;max-width:40px;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px}
-    .blk i{display:block;width:100%;border-radius:4px;background:var(--loss);opacity:.85}
-    .blk.g i{background:var(--win)}
-    .blk span{font-size:10.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
-    .blk:hover i{opacity:1}
-    .dense .blk span{display:none}
+    .strip{display:flex;gap:5px;align-items:stretch;height:150px;padding-top:4px}
+    .col{flex:1 1 0;min-width:12px;max-width:44px;display:grid;grid-template-rows:1fr 1fr auto;text-decoration:none}
+    .up,.down{position:relative}
+    .up{border-bottom:2px solid var(--line)}
+    .up i{position:absolute;left:0;right:0;bottom:0}
+    .down i{position:absolute;left:0;right:0;top:0}
+    i{display:flex;align-items:center;justify-content:center;border-radius:4px;opacity:.9}
+    i.g{background:var(--win)} i.p{background:var(--loss)}
+    i span{font-size:10px;font-weight:600;color:#fff;font-variant-numeric:tabular-nums;line-height:1}
+    .col:hover i{opacity:1}
+    .col b{font-size:10.5px;font-weight:500;color:var(--ink-3);text-align:center;padding-top:4px;font-variant-numeric:tabular-nums}
+    .dense .col b, .dense i span{display:none}
+    .leyenda{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;align-items:center}
+    .leyenda i{display:inline-block;width:10px;height:10px;border-radius:2px;vertical-align:-1px;margin-right:4px}
+    @media (max-width:600px){.strip{height:120px} i span{display:none}}
   `],
 })
-export class SeasonStripComponent { encuentros = input<any[]>([]); }
+export class SeasonStripComponent {
+  encuentros = input<any[]>([]);
+  /** margen 1..5 -> 30..100 % de la mitad disponible */
+  alto(e: any) { const m = Math.abs((e.pf ?? 0) - (e.pc ?? 0)); return 30 + 70 * (Math.max(1, m) - 1) / 4; }
+}
 
 @Component({ selector: 'app-state', template: `@if (error()) {<div class="notice error">{{ error() }}</div>} @else if (loading()) {<div class="loading">Cargando…</div>}` })
 export class StateComponent { loading = input(false); error = input<string | null>(null); }

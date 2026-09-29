@@ -24,7 +24,6 @@
         <div class="card-head"><h2>{{ s.t?.id === d.temporada.id ? 'La temporada, encuentro a encuentro' : 'Temporada ' + (s.t?.temporada || '') + ', encuentro a encuentro' }}</h2>
           @if (s.t?.id !== d.temporada.id) {<p-tag value="La liga actual aún no ha empezado: se muestra la anterior" severity="secondary" [rounded]="true" />}</div>
         @if (s.encs.length) {<app-season-strip [encuentros]="s.encs" />} @else {<div class="empty">Sin encuentros jugados todavía.</div>}
-        <p class="small muted" style="margin-top:6px">Cada bloque es un encuentro: verde ganado, rojo perdido; la altura es el margen del marcador. Pasa el ratón para ver el rival y pulsa para abrir el acta.</p>
       </div>
     }
 
